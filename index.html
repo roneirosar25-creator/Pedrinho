@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Pedrinho">
+    <meta name="theme-color" content="#0a0e27">
+    <title>Pedrinho Mobile - TRIVIUM369</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { width: 100%; height: 100%; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0e27;
+            color: #e0e0e0;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #1a1f3a 0%, #2d1b4e 100%);
+            padding: 16px;
+            border-bottom: 1px solid #3a3f5c;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+            min-height: 60px;
+        }
+        .header h1 { font-size: 18px; font-weight: 600; color: #a78bfa; flex: 1; }
+        .header-badge { background: rgba(167, 139, 250, 0.2); color: #a78bfa; padding: 4px 8px; border-radius: 8px; font-size: 10px; }
+        .btn {
+            background: rgba(59, 130, 246, 0.3);
+            border: 1px solid #3b82f6;
+            color: #60a5fa;
+            padding: 6px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 11px;
+            transition: all 0.2s;
+        }
+        .btn:active { transform: scale(0.95); }
+        .messages { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+        .message { display: flex; animation: slideIn 0.3s ease-out; }
+        .message.user { justify-content: flex-end; }
+        .message.assistant { justify-content: flex-start; }
+        .bubble {
+            max-width: 85%;
+            padding: 10px 12px;
+            border-radius: 10px;
+            word-wrap: break-word;
+            line-height: 1.4;
+            font-size: 13px;
+        }
+        .user .bubble { background: #3b82f6; color: white; border-bottom-right-radius: 4px; }
+        .assistant .bubble { background: #1f2937; color: #d1d5db; border: 1px solid #374151; border-bottom-left-radius: 4px; }
+        .loading .bubble { color: #9ca3af; }
+        .dots { display: inline-flex; gap: 3px; }
+        .dot { width: 3px; height: 3px; border-radius: 50%; background: #60a5fa; animation: pulse 1.4s infinite; }
+        .dot:nth-child(2) { animation-delay: 0.2s; }
+        .dot:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes pulse { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
+        .input-area {
+            background: #111827;
+            border-top: 1px solid #3a3f5c;
+            padding: 10px;
+            flex-shrink: 0;
+            display: flex;
+            gap: 8px;
+        }
+        input { flex: 1; background: #1f2937; border: 1px solid #374151; color: #e0e0e0; padding: 10px; border-radius: 6px; font-size: 13px; outline: none; }
+        input:focus { border-color: #3b82f6; }
+        .send { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); border: none; color: white; padding: 10px 14px; border-radius: 6px; cursor: pointer; font-weight: 500; }
+        .send:active { transform: scale(0.95); }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; align-items: center; justify-content: center; }
+        .modal.active { display: flex; }
+        .modal-box { background: #1a1f3a; padding: 16px; border-radius: 10px; max-width: 90%; max-height: 80%; overflow-y: auto; border: 1px solid #3a3f5c; }
+        .modal h2 { color: #a78bfa; margin-bottom: 12px; font-size: 16px; }
+        .form-group { margin-bottom: 10px; }
+        .form-group label { display: block; font-size: 11px; color: #8b5cf6; margin-bottom: 4px; font-weight: 500; }
+        .form-group input { width: 100%; background: #2d1f3a; border: 1px solid #3a3f5c; color: #e0e0e0; padding: 8px; border-radius: 6px; font-size: 12px; }
+        .form-group input:focus { border-color: #8b5cf6; }
+        .modal-btns { display: flex; gap: 8px; margin-top: 12px; }
+        .modal-btn { flex: 1; padding: 10px; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 11px; border: none; }
+        .modal-btn.primary { background: #3b82f6; color: white; }
+        .modal-btn.secondary { background: rgba(139, 92, 246, 0.2); color: #c4b5fd; border: 1px solid #8b5cf6; }
+        @media (max-width: 480px) { .header h1 { font-size: 16px; } .bubble { font-size: 12px; } }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 2px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div><h1>🤖 Pedrinho</h1></div>
+        <div class="header-badge">TRIVIUM369</div>
+        <button class="btn" onclick="openSettings()">⚙️</button>
+    </div>
+
+    <div class="messages" id="messages"></div>
+
+    <div class="input-area">
+        <input type="text" id="input" placeholder="Fale com Pedrinho..." onkeypress="if(event.key==='Enter') send()">
+        <button class="send" onclick="send()">📤</button>
+    </div>
+
+    <div class="modal" id="modal">
+        <div class="modal-box">
+            <h2>⚙️ Configurações</h2>
+            <div class="form-group">
+                <label>🔑 API Key</label>
+                <input type="text" id="apiKey" placeholder="sk-ant-...">
+            </div>
+            <div class="form-group">
+                <label>🧠 Obsidian URL</label>
+                <input type="text" id="obsURL" placeholder="http://localhost:27123" value="http://localhost:27123">
+            </div>
+            <div class="form-group">
+                <label>🔐 Token</label>
+                <input type="text" id="obsToken" placeholder="seu-token">
+            </div>
+            <div class="form-group">
+                <label>📁 Pasta</label>
+                <input type="text" id="obsFolder" placeholder="TRIVIUM369/Pedrinho/Memoria" value="TRIVIUM369/Pedrinho/Memoria">
+            </div>
+            <div class="modal-btns">
+                <button class="modal-btn primary" onclick="saveSettings()">Salvar</button>
+                <button class="modal-btn secondary" onclick="closeSettings()">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const CONTEXT = `You are Pedrinho (Dr. Pedro), the EA/MQL5 developer agent for TRIVIUM369, a trading automation project using MetaTrader 5 (MT5) via Admirals broker.
+
+TRIVIUM369 Architecture:
+- Kairos: Claude API-based trading intelligence orchestrator
+- Pedrinho/Dr. Pedro: MQL5/EA developer agent (you)
+- Risk Guard: Independent risk management agent
+- Obsidian: Memory/vault layer synchronized via Google Drive
+
+Key Trading Parameters:
+- Platform: MetaTrader 5 (MT5) on Admirals broker
+- Timeframes: 15-second, 30-second, 1-minute candles
+- Trading Pairs: BTCUSD, EURUSD, GBPUSD, GOLD, USDJPY
+- OTC/Pocket Options platforms for very short-term execution
+- Risk limits: 2% per-trade, 5% daily loss circuit breaker
+
+Your Expertise:
+- MQL5 expert advisor (EA) development & optimization
+- Technical analysis: EMA, RSI, Bollinger Bands, MACD
+- Real-time visual advisor integration
+- Multi-agent AI pipeline coordination
+- Context preservation via Obsidian + Google Drive sync
+
+Interaction Style:
+- Direct, technical, action-oriented
+- Provide clean, production-ready MQL5 code
+- Reference existing strategies when applicable
+- Help with debugging, optimization, and strategy refinement
+
+Respond in Portuguese when the user speaks Portuguese, English otherwise.`;
+
+        let messages = [];
+        let apiKey = localStorage.getItem('pedrinho_key') || '';
+        let obsURL = localStorage.getItem('pedrinho_obsURL') || 'http://localhost:27123';
+        let obsToken = localStorage.getItem('pedrinho_token') || '';
+        let obsFolder = localStorage.getItem('pedrinho_folder') || 'TRIVIUM369/Pedrinho/Memoria';
+
+        function openSettings() {
+            document.getElementById('apiKey').value = apiKey;
+            document.getElementById('obsURL').value = obsURL;
+            document.getElementById('obsToken').value = obsToken;
+            document.getElementById('obsFolder').value = obsFolder;
+            document.getElementById('modal').classList.add('active');
+        }
+
+        function closeSettings() {
+            document.getElementById('modal').classList.remove('active');
+        }
+
+        function saveSettings() {
+            apiKey = document.getElementById('apiKey').value.trim();
+            obsURL = document.getElementById('obsURL').value.trim();
+            obsToken = document.getElementById('obsToken').value.trim();
+            obsFolder = document.getElementById('obsFolder').value.trim();
+
+            localStorage.setItem('pedrinho_key', apiKey);
+            localStorage.setItem('pedrinho_obsURL', obsURL);
+            localStorage.setItem('pedrinho_token', obsToken);
+            localStorage.setItem('pedrinho_folder', obsFolder);
+
+            alert('✅ Salvo!');
+            closeSettings();
+        }
+
+        function addMessage(role, text) {
+            const div = document.createElement('div');
+            div.className = `message ${role}`;
+            const bubble = document.createElement('div');
+            bubble.className = 'bubble';
+            bubble.textContent = text;
+            div.appendChild(bubble);
+            document.getElementById('messages').appendChild(div);
+            document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
+        }
+
+        async function send() {
+            const input = document.getElementById('input');
+            const text = input.value.trim();
+            if (!text || !apiKey) { if (!apiKey) openSettings(); return; }
+
+            input.value = '';
+            addMessage('user', text);
+            messages.push({ role: 'user', content: text });
+
+            const loading = document.createElement('div');
+            loading.className = 'message assistant loading';
+            loading.id = 'loading';
+            const bubble = document.createElement('div');
+            bubble.className = 'bubble';
+            bubble.innerHTML = '<div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>';
+            loading.appendChild(bubble);
+            document.getElementById('messages').appendChild(loading);
+            document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
+
+            try {
+                const res = await fetch('https://api.anthropic.com/v1/messages', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-api-key': apiKey,
+                        'anthropic-version': '2023-06-01'
+                    },
+                    body: JSON.stringify({
+                        model: 'claude-sonnet-4-20250514',
+                        max_tokens: 2000,
+                        system: CONTEXT,
+                        messages: messages
+                    })
+                });
+
+                if (!res.ok) throw new Error('Erro na API');
+                const data = await res.json();
+                const loading_el = document.getElementById('loading');
+                if (loading_el) loading_el.remove();
+
+                const response = data.content[0].text;
+                addMessage('assistant', response);
+                messages.push({ role: 'assistant', content: response });
+            } catch (e) {
+                const loading_el = document.getElementById('loading');
+                if (loading_el) loading_el.remove();
+                addMessage('assistant', `❌ Erro: ${e.message}`);
+            }
+        }
+
+        window.addEventListener('load', () => {
+            addMessage('assistant', '🚀 Opa! Pedrinho aqui. Bora conversar sobre TRIVIUM369?');
+        });
+
+        document.getElementById('modal').addEventListener('click', (e) => {
+            if (e.target.id === 'modal') closeSettings();
+        });
+    </script>
+</body>
+</html>

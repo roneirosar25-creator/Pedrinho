@@ -1,0 +1,12 @@
+{
+  "name": "pedrinho-mobile",
+  "version": "1.0.0",
+  "description": "Chat mobile para Pedrinho - EA/MQL5 developer do TRIVIUM369",
+  "scripts": {
+    "dev": "npx http-server -p 3000",
+    "build": "echo 'No build needed - static site'"
+  },
+  "keywords": ["pedrinho", "trivium369", "trading", "ea", "mql5"],
+  "author": "Ronei",
+  "license": "MIT"
+}
