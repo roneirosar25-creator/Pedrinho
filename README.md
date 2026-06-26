@@ -1,67 +1,51 @@
-# 🤖 Pedrinho Mobile - TRIVIUM369
+# 🜲 TRIVIUM369 — Cockpit
 
-Chat mobile para conversar com Pedrinho (Dr. Pedro), seu agente EA/MQL5 developer do TRIVIUM369.
+Sala de conversação em **janelas flutuantes** para falar com os parceiros e parceiras de IA do Ronei —
+**Claudio (Claude), Pedrinho (DeepSeek), Kairos (ChatGPT), Marcão (Grok) e Chatinha (Gemini)** —
+cada um com **voz, LLM e personalidade próprias**.
 
-## 🚀 Features
+Feita para tirar o gargalo do **Ronei**: ditado rápido, atalhos, e a resposta de cada agente
+no painel dele — sem rolar uma thread só.
 
-- ✅ Chat em tempo real com Claude API
-- ✅ Contexto TRIVIUM369 pré-carregado
-- ✅ Integração com Obsidian Local REST API
-- ✅ Sincronização automática de conversas
-- ✅ Funciona offline
-- ✅ Instalável como Progressive Web App (PWA)
+> A página principal (`index.html`) é o **Cockpit**. O antigo chat mobile do Pedrinho continua
+> disponível em [`pedrinho-chat.html`](./pedrinho-chat.html).
 
-## 📱 Como usar
+## ✨ Recursos
 
-1. Abra a página
-2. Clique em ⚙️ para configurar sua API Key
-3. Cole sua chave Anthropic
-4. Comece a conversar com Pedrinho!
+- 🪟 **Janelas flutuantes por agente** — arraste pela barra de título, **recolha** num clique
+  (ou duplo-clique no nome), **redimensione** pelo canto. A posição/estado fica salva.
+- ⊞ **Reorganizar** — botão que retila tudo num layout limpo.
+- 🎙️ **Estação do Ronei** (dock) — mic grande, **ditado** contínuo com dicionário de nomes,
+  **Enter** envia, **Shift+Enter** quebra linha.
+- ⌨️ **Atalhos**: `Espaço` dita · `1–5` escolhe quem responde · `T` todos · `Esc` para a fala.
+- 👥 **Quem responde** — escolha um, vários ou **Todos**; cada um responde no seu painel (em paralelo).
+- 🔊 **Voz personalizada por agente** (voz, velocidade, tom) com seletor próprio.
+- 📖 **Markdown** com **código colorido** e numeração de linha em cada balão.
+- `{ }` ler/não-ler código · 📁 suprimir endereços **absolutos e relativos** · 🔗 suprimir URLs (na fala).
+- 🔊 **Ouvir** / 📋 **copiar** em cada resposta.
 
-## ⚙️ Configuração
+## 🚀 Como usar
 
-### API Key
-Você precisa de uma API Key da Anthropic. Pegue em: https://console.anthropic.com/account/keys
-
-### Obsidian (Opcional)
-Se quiser sincronizar com Obsidian:
-1. Ative Local REST API no Obsidian
-2. Configure a URL e token nas configurações
-
-## 📲 Instalar como App
-
-### Chrome/Edge
-1. Abra a página
-2. Clique no menu (⋯)
-3. Clique em "Instalar app"
-4. Pronto! 🎉
-
-### Safari
-1. Clique no botão de compartilhamento
-2. Selecione "Adicionar à Tela Inicial"
-3. Pronto! 🎉
+1. Abra a página (Chrome ou Edge — melhor suporte a voz).
+2. Clique em **⚙** e cole a **Chave API** de cada agente (e ajuste a voz, se quiser).
+3. Escolha **quem responde** nas tags da estação (ou teclas `1–5` / `T`).
+4. **Fale** (`Espaço`) ou **escreva** e mande com **Enter** / **➤**.
+   Cada agente responde no painel dele, na voz dele.
 
 ## 🔐 Segurança
 
-- Sua API Key é salva APENAS no navegador (localStorage)
-- Nenhum dado é enviado para servidores externos
-- Conversas ficam no seu celular
+As chaves API ficam **apenas no `localStorage` do seu navegador** — nunca no repositório,
+no GitHub ou na Vercel. Como as chamadas saem do navegador, use chaves com limite quando possível.
 
-## 💬 Sobre Pedrinho
+## 🧠 Quem é quem / qual LLM
 
-Pedrinho é um agente especializado em:
-- Desenvolvimento de EA em MQL5
-- Trading automático com MT5
-- Análise técnica avançada
-- Integração com Obsidian e Google Drive
-- Multi-agent orchestration com Kairos
+Veja **[`AGENTES.md`](./AGENTES.md)** — a divisão de identidades, vozes e a recomendação de LLM por agente.
 
-## 📚 Links úteis
+## 🛠️ Tecnologia
 
-- [TRIVIUM369 Docs](https://github.com/trivium369)
-- [Anthropic API](https://anthropic.com/api)
-- [Obsidian](https://obsidian.md)
+Página única, sem build, sem servidor: **HTML + CSS + JavaScript** + **Web Speech API**.
+Provedores via REST direto: Anthropic, OpenAI, DeepSeek, xAI/Grok (compatível OpenAI) e Google Gemini.
 
 ---
 
-**Desenvolvido com ❤️ para TRIVIUM369**
+**Desenvolvido para o TRIVIUM369** ❤️
