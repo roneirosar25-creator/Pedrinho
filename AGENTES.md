@@ -48,16 +48,16 @@ As personas vivem no campo `system` de cada agente em `index.html` — edite à 
 
 ---
 
-## 4. Recursos da sala (já implementados)
+## 4. Recursos da sala (Cockpit — já implementados)
 
-- **Voz personalizada por agente** (nome da voz + velocidade + tom), com seletor de voz por agente.
-- **Leitor de Markdown** com **código colorido** (syntax highlight) e numeração de linhas.
-- **Ler / Não-ler código** (botão `{ }`) — pula blocos de código na leitura, mas mantém a exibição colorida.
-- **Supressão de endereços** (botão 📁) — remove caminhos **absolutos** (`C:\...`, `/Users/...`, `/home/...`) **e relativos** (`./src/x.js`, `../lib`, `pasta/arquivo.ext`) da fala. URLs têm botão próprio (🔗).
-- **Leitura frase a frase** com destaque de palavra, anterior/próxima, clicar para pular.
-- **Voz→Texto (ditado)** contínuo com dicionário de correção dos nomes (Ronei, Kairos, Pedrinho, Marcão, Chatinha, TRIVIUM369, pares de FX, etc.).
-- **Enviar para o agente ativo** — se a Chave API daquele agente estiver configurada, chama o LLM direto e lê a resposta na voz dele. Sem chave, é só colar a resposta que a sala lê.
-- **Corrigir / Copiar / Salvar (.md) / Preview Markdown** no painel de fala.
+- **Janelas flutuantes por agente** — arrastáveis pela barra de título, **recolhíveis** (▾ ou duplo-clique no nome) e **redimensionáveis**; posição/estado salvos. Botão **⊞** reorganiza tudo.
+- **Estação do Ronei** (dock) com mic grande e ditado contínuo — feita para tirar o gargalo do humano.
+- **Atalhos**: `Espaço` dita · `1–5` escolhe quem responde · `T` todos · `Enter` envia · `Esc` para a fala.
+- **Voz personalizada por agente** (voz + velocidade + tom), com seletor de voz por agente.
+- **Markdown** com **código colorido** (syntax highlight) e numeração de linha em cada balão.
+- **Ler / Não-ler código** (`{ }`) · **Supressão de endereços** (📁) **absolutos** (`C:\...`, `/home/...`) **e relativos** (`./src/x.js`, `pasta/arquivo.ext`) · **URLs** (🔗) — aplicado à fala (TTS).
+- **Voz→Texto (ditado)** contínuo com dicionário de correção dos nomes (Ronei, Kairos, Pedrinho, Marcão, Chatinha, TRIVIUM369, pares de FX).
+- **Enviar para quem você escolher** — um, vários ou Todos; cada agente com chave responde **no seu painel, em paralelo**, e fala na voz dele. **🔊 ouvir** e **📋 copiar** em cada resposta.
 
 ---
 

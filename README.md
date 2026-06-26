@@ -1,31 +1,36 @@
-# 🜲 TRIVIUM369 — Sala de Conversação
+# 🜲 TRIVIUM369 — Cockpit
 
-Transcritor e leitor de voz para conversar com os parceiros e parceiras de IA do Ronei —
+Sala de conversação em **janelas flutuantes** para falar com os parceiros e parceiras de IA do Ronei —
 **Claudio (Claude), Pedrinho (DeepSeek), Kairos (ChatGPT), Marcão (Grok) e Chatinha (Gemini)** —
 cada um com **voz, LLM e personalidade próprias**.
 
-> A página principal (`index.html`) é a **Sala**. O antigo chat mobile do Pedrinho continua
+Feita para tirar o gargalo do **Ronei**: ditado rápido, atalhos, e a resposta de cada agente
+no painel dele — sem rolar uma thread só.
+
+> A página principal (`index.html`) é o **Cockpit**. O antigo chat mobile do Pedrinho continua
 > disponível em [`pedrinho-chat.html`](./pedrinho-chat.html).
 
 ## ✨ Recursos
 
-- 🎙️ **Ditado** (voz→texto) contínuo, com dicionário de correção dos nomes do time.
-- 🔊 **Voz personalizada por agente** (nome da voz, velocidade e tom), com seletor próprio.
-- 📖 **Leitor de Markdown** com **código colorido** e numeração de linha.
-- `{ }` **Ler / não-ler código** — pula código na leitura, mantém a exibição.
-- 📁 **Supressão de endereços** absolutos (`C:\…`, `/home/…`) **e** relativos (`./src/x.js`, `pasta/arquivo.ext`).
-- 🔗 **Supressão de URLs**.
-- ⏯️ **Leitura frase a frase** com destaque de palavra; clicar para pular.
-- ➤ **Enviar para o agente ativo** — chama a IA direto (se a chave estiver configurada) e lê a resposta na voz dele.
-- ✏️ Corrigir / 📋 Copiar / 💾 Salvar (.md) / **MD** preview no painel de fala.
+- 🪟 **Janelas flutuantes por agente** — arraste pela barra de título, **recolha** num clique
+  (ou duplo-clique no nome), **redimensione** pelo canto. A posição/estado fica salva.
+- ⊞ **Reorganizar** — botão que retila tudo num layout limpo.
+- 🎙️ **Estação do Ronei** (dock) — mic grande, **ditado** contínuo com dicionário de nomes,
+  **Enter** envia, **Shift+Enter** quebra linha.
+- ⌨️ **Atalhos**: `Espaço` dita · `1–5` escolhe quem responde · `T` todos · `Esc` para a fala.
+- 👥 **Quem responde** — escolha um, vários ou **Todos**; cada um responde no seu painel (em paralelo).
+- 🔊 **Voz personalizada por agente** (voz, velocidade, tom) com seletor próprio.
+- 📖 **Markdown** com **código colorido** e numeração de linha em cada balão.
+- `{ }` ler/não-ler código · 📁 suprimir endereços **absolutos e relativos** · 🔗 suprimir URLs (na fala).
+- 🔊 **Ouvir** / 📋 **copiar** em cada resposta.
 
 ## 🚀 Como usar
 
 1. Abra a página (Chrome ou Edge — melhor suporte a voz).
-2. Clique em **⚙** e cole a **Chave API** de cada agente que quiser ativar (e ajuste a voz).
-3. Escolha o agente na barra de **abas** no topo.
-4. **Fale** (tecla Espaço) ou **escreva** no painel direito e clique **➤** para enviar.
-   - Sem chave configurada, é só **colar** a resposta do agente no painel esquerdo (📋) que a sala lê.
+2. Clique em **⚙** e cole a **Chave API** de cada agente (e ajuste a voz, se quiser).
+3. Escolha **quem responde** nas tags da estação (ou teclas `1–5` / `T`).
+4. **Fale** (`Espaço`) ou **escreva** e mande com **Enter** / **➤**.
+   Cada agente responde no painel dele, na voz dele.
 
 ## 🔐 Segurança
 
