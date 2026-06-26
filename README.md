@@ -1,67 +1,46 @@
-# 🤖 Pedrinho Mobile - TRIVIUM369
+# 🜲 TRIVIUM369 — Sala de Conversação
 
-Chat mobile para conversar com Pedrinho (Dr. Pedro), seu agente EA/MQL5 developer do TRIVIUM369.
+Transcritor e leitor de voz para conversar com os parceiros e parceiras de IA do Ronei —
+**Claudio (Claude), Pedrinho (DeepSeek), Kairos (ChatGPT), Marcão (Grok) e Chatinha (Gemini)** —
+cada um com **voz, LLM e personalidade próprias**.
 
-## 🚀 Features
+> A página principal (`index.html`) é a **Sala**. O antigo chat mobile do Pedrinho continua
+> disponível em [`pedrinho-chat.html`](./pedrinho-chat.html).
 
-- ✅ Chat em tempo real com Claude API
-- ✅ Contexto TRIVIUM369 pré-carregado
-- ✅ Integração com Obsidian Local REST API
-- ✅ Sincronização automática de conversas
-- ✅ Funciona offline
-- ✅ Instalável como Progressive Web App (PWA)
+## ✨ Recursos
 
-## 📱 Como usar
+- 🎙️ **Ditado** (voz→texto) contínuo, com dicionário de correção dos nomes do time.
+- 🔊 **Voz personalizada por agente** (nome da voz, velocidade e tom), com seletor próprio.
+- 📖 **Leitor de Markdown** com **código colorido** e numeração de linha.
+- `{ }` **Ler / não-ler código** — pula código na leitura, mantém a exibição.
+- 📁 **Supressão de endereços** absolutos (`C:\…`, `/home/…`) **e** relativos (`./src/x.js`, `pasta/arquivo.ext`).
+- 🔗 **Supressão de URLs**.
+- ⏯️ **Leitura frase a frase** com destaque de palavra; clicar para pular.
+- ➤ **Enviar para o agente ativo** — chama a IA direto (se a chave estiver configurada) e lê a resposta na voz dele.
+- ✏️ Corrigir / 📋 Copiar / 💾 Salvar (.md) / **MD** preview no painel de fala.
 
-1. Abra a página
-2. Clique em ⚙️ para configurar sua API Key
-3. Cole sua chave Anthropic
-4. Comece a conversar com Pedrinho!
+## 🚀 Como usar
 
-## ⚙️ Configuração
-
-### API Key
-Você precisa de uma API Key da Anthropic. Pegue em: https://console.anthropic.com/account/keys
-
-### Obsidian (Opcional)
-Se quiser sincronizar com Obsidian:
-1. Ative Local REST API no Obsidian
-2. Configure a URL e token nas configurações
-
-## 📲 Instalar como App
-
-### Chrome/Edge
-1. Abra a página
-2. Clique no menu (⋯)
-3. Clique em "Instalar app"
-4. Pronto! 🎉
-
-### Safari
-1. Clique no botão de compartilhamento
-2. Selecione "Adicionar à Tela Inicial"
-3. Pronto! 🎉
+1. Abra a página (Chrome ou Edge — melhor suporte a voz).
+2. Clique em **⚙** e cole a **Chave API** de cada agente que quiser ativar (e ajuste a voz).
+3. Escolha o agente na barra de **abas** no topo.
+4. **Fale** (tecla Espaço) ou **escreva** no painel direito e clique **➤** para enviar.
+   - Sem chave configurada, é só **colar** a resposta do agente no painel esquerdo (📋) que a sala lê.
 
 ## 🔐 Segurança
 
-- Sua API Key é salva APENAS no navegador (localStorage)
-- Nenhum dado é enviado para servidores externos
-- Conversas ficam no seu celular
+As chaves API ficam **apenas no `localStorage` do seu navegador** — nunca no repositório,
+no GitHub ou na Vercel. Como as chamadas saem do navegador, use chaves com limite quando possível.
 
-## 💬 Sobre Pedrinho
+## 🧠 Quem é quem / qual LLM
 
-Pedrinho é um agente especializado em:
-- Desenvolvimento de EA em MQL5
-- Trading automático com MT5
-- Análise técnica avançada
-- Integração com Obsidian e Google Drive
-- Multi-agent orchestration com Kairos
+Veja **[`AGENTES.md`](./AGENTES.md)** — a divisão de identidades, vozes e a recomendação de LLM por agente.
 
-## 📚 Links úteis
+## 🛠️ Tecnologia
 
-- [TRIVIUM369 Docs](https://github.com/trivium369)
-- [Anthropic API](https://anthropic.com/api)
-- [Obsidian](https://obsidian.md)
+Página única, sem build, sem servidor: **HTML + CSS + JavaScript** + **Web Speech API**.
+Provedores via REST direto: Anthropic, OpenAI, DeepSeek, xAI/Grok (compatível OpenAI) e Google Gemini.
 
 ---
 
-**Desenvolvido com ❤️ para TRIVIUM369**
+**Desenvolvido para o TRIVIUM369** ❤️
