@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#05060c">
-<title>TRIVIUM369 — Cockpit</title>
+<title>TRIVIUM369 — Mesa Redonda</title>
 <style>
 :root{ --accent:#6366f1; }
 *{box-sizing:border-box;margin:0;padding:0}
@@ -18,7 +18,6 @@ body{
   background-size:auto,auto,22px 22px;
   color:#b8c8e4;font-family:'Segoe UI',system-ui,sans-serif;height:100vh;overflow:hidden;
 }
-/* TOPO */
 #topo{position:fixed;top:0;left:0;right:0;height:44px;z-index:5000;display:flex;align-items:center;gap:9px;padding:0 12px;background:rgba(6,8,16,.82);backdrop-filter:blur(10px);border-bottom:1px solid rgba(255,255,255,.06)}
 #dot{width:12px;height:12px;border-radius:50%;background:#1e2840;flex-shrink:0;transition:all .3s}
 #dot.on{background:#22c55e;box-shadow:0 0 14px rgba(34,197,94,.9);animation:pulse .8s infinite}
@@ -29,53 +28,47 @@ body{
 .tbtn{background:rgba(20,25,45,.7);border:1px solid rgba(255,255,255,.08);color:#7c8ab0;border-radius:9px;padding:5px 9px;cursor:pointer;font-size:.95em;transition:all .18s;flex-shrink:0}
 .tbtn:hover{border-color:var(--accent);color:#cdd6f4}
 .tbtn.on{background:#1e0e42;color:#a78bfa;border-color:#5b21b6}
-/* CANVAS */
 #canvas{position:fixed;inset:44px 0 0 0;overflow:hidden}
-/* JANELA GENÉRICA */
-.win{position:absolute;display:flex;flex-direction:column;border-radius:14px;background:rgba(12,15,28,.78);backdrop-filter:blur(12px);border:1px solid var(--wc,rgba(255,255,255,.09));box-shadow:0 12px 40px -12px rgba(0,0,0,.7),0 0 0 1px rgba(255,255,255,.02) inset;overflow:hidden;transition:box-shadow .2s,border-color .2s;min-width:230px}
-.win.foco{box-shadow:0 16px 50px -10px rgba(0,0,0,.8),0 0 24px -6px var(--wc)}
-.win .tbar{display:flex;align-items:center;gap:7px;padding:8px 10px;cursor:grab;user-select:none;background:linear-gradient(180deg,var(--wbg,rgba(255,255,255,.04)),transparent);border-bottom:1px solid rgba(255,255,255,.05);touch-action:none}
+.win{position:absolute;display:flex;flex-direction:column;border-radius:14px;background:rgba(10,13,24,.82);backdrop-filter:blur(12px);border:1px solid var(--wc,rgba(255,255,255,.1));box-shadow:0 14px 44px -14px rgba(0,0,0,.75);overflow:hidden;min-width:260px}
+.win.foco{box-shadow:0 18px 54px -10px rgba(0,0,0,.85),0 0 26px -8px var(--wc)}
+.win .tbar{display:flex;align-items:center;gap:7px;padding:8px 11px;cursor:grab;user-select:none;background:linear-gradient(180deg,var(--wbg,rgba(255,255,255,.05)),transparent);border-bottom:1px solid rgba(255,255,255,.05);touch-action:none}
 .win .tbar:active{cursor:grabbing}
-.win .ttl{font-size:.82em;font-weight:800;letter-spacing:.4px;color:var(--wc);white-space:nowrap;display:flex;align-items:center;gap:6px}
-.win .prov{font-size:.64em;color:#475569;font-weight:600;letter-spacing:.5px}
-.win .api{width:6px;height:6px;border-radius:50%;background:#33415560;flex-shrink:0}
-.win .api.ok{background:#22c55e;box-shadow:0 0 5px #22c55e}
+.win .ttl{font-size:.84em;font-weight:800;letter-spacing:.4px;color:var(--wc);white-space:nowrap;display:flex;align-items:center;gap:6px}
 .win .tsp{flex:1}
 .wbtn{background:transparent;border:none;color:#5a6a8a;cursor:pointer;font-size:.95em;padding:2px 5px;border-radius:6px;line-height:1;transition:all .15s}
 .wbtn:hover{background:rgba(255,255,255,.08);color:#cdd6f4}
-.win .body{flex:1;overflow:auto;padding:10px 12px;resize:both;min-height:60px;min-width:220px}
-.win.col .body{display:none}
-.win.col{height:auto!important;resize:none}
-.win .body::-webkit-scrollbar{width:6px}.win .body::-webkit-scrollbar-thumb{background:#1e2840;border-radius:3px}
-/* mensagens dentro do painel do agente */
-.line{margin-bottom:9px;animation:slide .2s ease-out}
-@keyframes slide{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
-.line.voce .who{color:#5b6b8c}
-.line .who{font-size:.66em;font-weight:800;letter-spacing:.5px;margin-bottom:2px;color:var(--wc)}
-.line .txt{font-size:.94em;line-height:1.6}
-.line.voce .txt{color:#8aa0c4;background:rgba(99,102,241,.06);border-left:2px solid rgba(99,102,241,.25);padding:4px 8px;border-radius:0 7px 7px 0}
-.line.ag .txt{color:#aebbd4}
-.line.ag .txt.pend{color:#3a5070;font-style:italic}
-.line.ag .txt.erro{color:#fca5a5}
-.txt p{margin:0 0 5px}.txt p:last-child{margin-bottom:0}
-.txt strong{color:#dbe4fb}
-.txt code{background:#0d1425;padding:1px 5px;border-radius:4px;color:#67e8f9;font-size:.92em}
-.txt h2,.txt h3,.txt h4{color:var(--wc);margin:7px 0 4px;font-size:1.02em}
-.txt .li{margin:2px 0 2px 5px}
-.line .mini{display:flex;gap:5px;margin-top:4px}
-.mbtn2{background:rgba(255,255,255,.04);border:1px solid var(--wc);color:var(--wc);border-radius:6px;padding:1px 7px;font-size:.72em;cursor:pointer;opacity:.8}
-.mbtn2:hover{opacity:1;background:var(--wc);color:#05060c}
-.win .vaziop{color:#22304d;font-size:.82em;text-align:center;padding:14px 4px;font-style:italic}
+.win .body{flex:1;overflow:auto;padding:12px 13px;resize:both;min-height:80px;min-width:240px}
+.win.col .body{display:none}.win.col{height:auto!important;resize:none}
+.win .body::-webkit-scrollbar{width:7px}.win .body::-webkit-scrollbar-thumb{background:#1e2840;border-radius:3px}
+/* mensagens da sala */
+.line{margin-bottom:13px;animation:slide .22s ease-out;max-width:760px}
+@keyframes slide{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+.line .who{font-size:.72em;font-weight:800;letter-spacing:.5px;margin-bottom:3px;display:flex;align-items:center;gap:6px;color:var(--lc)}
+.bub{border-radius:12px;padding:9px 13px;font-size:.97em;line-height:1.62;border:1px solid var(--lc);border-left-width:3px;background:rgba(255,255,255,.022)}
+.line.ronei{margin-left:auto}.line.ronei .who{justify-content:flex-end}
+.line.ronei .bub{background:rgba(52,211,153,.07);color:#bfe9d3}
+.line.ag .bub{color:#aebbd4}
+.line .bub.pend{color:#3a5070;font-style:italic}
+.line .bub.erro{color:#fca5a5;border-color:#5a1010}
+.bub p{margin:0 0 6px}.bub p:last-child{margin-bottom:0}
+.bub strong{color:#dbe4fb}
+.bub code{background:#0d1425;padding:1px 5px;border-radius:4px;color:#67e8f9;font-size:.92em}
+.bub h2,.bub h3,.bub h4{color:var(--lc);margin:7px 0 4px;font-size:1.05em}
+.bub .li{margin:2px 0 2px 6px}
+.mini{display:flex;gap:6px;margin-top:4px}
+.mbtn2{background:rgba(255,255,255,.04);border:1px solid var(--lc);color:var(--lc);border-radius:6px;padding:1px 8px;font-size:.74em;cursor:pointer;opacity:.85}
+.mbtn2:hover{opacity:1;background:var(--lc);color:#05060c}
+.vaziop{color:#22304d;font-size:.86em;text-align:center;padding:24px 8px;font-style:italic;line-height:1.8}
 /* código colorido */
-.code-block{margin:6px 0;border-radius:9px;overflow:hidden;border:1px solid rgba(139,92,246,.14);background:rgba(139,92,246,.03)}
+.code-block{margin:7px 0;border-radius:9px;overflow:hidden;border:1px solid rgba(139,92,246,.16);background:rgba(139,92,246,.03)}
 .code-header{display:flex;gap:8px;padding:4px 10px;background:rgba(0,0,0,.45);font-size:.72em}
 .code-lang{color:#34d399;font-family:monospace;text-transform:uppercase;letter-spacing:2px}
-.code-block pre{margin:0;padding:8px 0;font-family:'Cascadia Code','Consolas',monospace;font-size:.8em;line-height:1.55;overflow-x:auto}
-.code-block .cl{display:flex;gap:9px;padding:0 11px}
+.code-block pre{margin:0;padding:9px 0;font-family:'Cascadia Code','Consolas',monospace;font-size:.82em;line-height:1.55;overflow-x:auto}
+.code-block .cl{display:flex;gap:10px;padding:0 12px}
 .code-block .ln{color:#2a3a5a;min-width:22px;text-align:right;flex-shrink:0;user-select:none}
 .code-block code{color:#6ee77a;white-space:pre-wrap;word-break:break-word;flex:1}
 .ck-kw{color:#ff79c6;font-weight:600}.ck-str{color:#f1fa8c}.ck-num{color:#bd93f9}.ck-cmt{color:#6272a4;font-style:italic}.ck-pun{color:#f8f8f2}.ck-op{color:#ff79c6}.ck-dec{color:#50fa7b}.ck-bi{color:#8be9fd}.ck-tag{color:#ff5555}.ck-atr{color:#50fa7b}
-/* DOCK DO RONEI */
+/* dock */
 #dock{--wc:#34d399;z-index:4000}
 #dock .body{resize:horizontal;overflow:visible;padding:10px 11px}
 #chips{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px}
@@ -87,21 +80,20 @@ body{
 #chip-todos{border-color:#94a3b8;color:#94a3b8}#chip-todos.ativo{background:#94a3b8;color:#05060c}
 .docrow{display:flex;align-items:flex-end;gap:8px}
 #entrada{flex:1;resize:none;max-height:160px;min-height:46px;background:#070a16;border:1px solid #233048;color:#d6e4fb;border-radius:12px;padding:11px 13px;font-family:inherit;font-size:1.05em;line-height:1.45;outline:none}
-#entrada:focus{border-color:#34d399}
-#entrada::placeholder{color:#243049}
+#entrada:focus{border-color:#34d399}#entrada::placeholder{color:#243049}
 .cbig{border-radius:13px;border:1px solid;cursor:pointer;flex-shrink:0;width:52px;height:52px;font-size:1.35em;display:flex;align-items:center;justify-content:center;transition:all .15s}
 #mic{background:#042810;color:#4ade80;border-color:#0a7a30}
 #mic.ativo{background:#0a8038;color:#d9ffe6;border-color:#10b050;animation:pulse 1.05s infinite;box-shadow:0 0 18px -3px #10b050}
-#send{background:#34d399;color:#05060c;border-color:#34d399;font-weight:800}
-#send:hover{filter:brightness(1.12)}
+#send{background:#34d399;color:#05060c;border-color:#34d399;font-weight:800}#send:hover{filter:brightness(1.12)}
+#rodada{background:rgba(99,102,241,.12);color:#a5b4fc;border:1px solid #4f46e5;border-radius:10px;padding:6px 10px;font-size:.76em;font-weight:700;cursor:pointer;margin-top:7px}
+#rodada:hover{background:rgba(99,102,241,.22)}
 #interim{font-size:.84em;color:#1e7a3a;font-style:italic;min-height:16px;margin-top:5px;padding-left:3px}
-/* MODAL */
+/* modal */
 #modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:9000;align-items:center;justify-content:center;padding:14px}
 #modal.on{display:flex}
 .modal-box{background:#0b0f1e;border:1px solid rgba(255,255,255,.1);border-radius:16px;max-width:560px;width:100%;max-height:88vh;overflow-y:auto;padding:18px}
 .modal-box::-webkit-scrollbar{width:6px}.modal-box::-webkit-scrollbar-thumb{background:#1e2840;border-radius:3px}
-.modal-box h2{color:#cdd6f4;font-size:1.05em;margin-bottom:4px}
-.modal-box .sub{color:#3a5070;font-size:.8em;margin-bottom:14px;line-height:1.5}
+.modal-box h2{color:#cdd6f4;font-size:1.05em;margin-bottom:4px}.modal-box .sub{color:#3a5070;font-size:.8em;margin-bottom:14px;line-height:1.5}
 .cfg-ag{border:1px solid var(--ac);border-radius:11px;padding:11px 12px;margin-bottom:11px}
 .cfg-ag h3{font-size:.92em;color:var(--ac);display:flex;align-items:center;gap:7px;margin-bottom:8px}
 .cfg-ag .meta{font-size:.72em;color:#475569;font-weight:600;margin-left:auto}
@@ -110,18 +102,18 @@ body{
 .cfg-cols{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .modal-foot{display:flex;gap:8px;margin-top:6px}
 .mbtn{flex:1;padding:10px;border-radius:9px;cursor:pointer;font-weight:700;font-size:.86em;border:1px solid}
-.mbtn.prim{background:var(--accent);color:#05060c;border-color:var(--accent)}
-.mbtn.sec{background:rgba(255,255,255,.04);color:#94a3b8;border-color:rgba(255,255,255,.12)}
+.mbtn.prim{background:var(--accent);color:#05060c;border-color:var(--accent)}.mbtn.sec{background:rgba(255,255,255,.04);color:#94a3b8;border-color:rgba(255,255,255,.12)}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
-#hint{position:fixed;bottom:6px;left:0;right:0;text-align:center;font-size:.68em;color:#1c2740;z-index:3000;pointer-events:none}
+#hint{position:fixed;bottom:5px;left:0;right:0;text-align:center;font-size:.67em;color:#1c2740;z-index:3000;pointer-events:none}
 </style>
 </head>
 <body>
 
 <div id="topo">
   <div id="dot"></div>
-  <div id="brand">TRIVIUM369 <small>· Cockpit</small></div>
+  <div id="brand">TRIVIUM369 <small>· Mesa Redonda</small></div>
   <span id="status">Iniciando…</span>
+  <button class="tbtn" id="t-spk" onclick="toggleAuto()" title="Auto-ouvir: ler cada resposta em voz alta">🔊</button>
   <button class="tbtn" id="t-cod" onclick="toggleSup('cod')" title="Ler / não ler código na fala">{ }</button>
   <button class="tbtn" id="t-end" onclick="toggleSup('end')" title="Suprimir endereços (absolutos e relativos) na fala">📁</button>
   <button class="tbtn" id="t-url" onclick="toggleSup('url')" title="Suprimir URLs na fala">🔗</button>
@@ -129,8 +121,8 @@ body{
   <button class="tbtn" onclick="abrirConfig()" title="Chaves API e vozes">⚙</button>
 </div>
 
-<div id="canvas"><!-- janelas dos agentes + dock via JS --></div>
-<div id="hint">arraste pela barra de título · clique no título p/ recolher · 1–5 escolhe quem responde · Espaço dita · Enter envia</div>
+<div id="canvas"></div>
+<div id="hint">arraste pela barra · clique no título recolhe · 1–5 escolhe quem responde · T todos · Espaço dita · Enter envia</div>
 
 <div id="modal">
   <div class="modal-box">
@@ -149,18 +141,20 @@ body{
 
 /* ═══════════ ROSTER ═══════════ */
 var AGENTS={
-  claudio:{nome:'Claudio',emoji:'🧠',cor:'#6366f1',provider:'anthropic',model:'claude-opus-4-8',voiceHint:['daniel','luciana','google português','microsoft'],rate:1.5,pitch:1.0,system:'Você é Claudio, arquiteto-chefe do TRIVIUM369: raciocínio longo, arquitetura, código complexo e revisão crítica. Analítico, claro, dá recomendação direta. Sala de chat em grupo (Ronei, Pedrinho, Kairos, Marcão, Chatinha) — seja conciso. PT-BR.'},
-  pedrinho:{nome:'Pedrinho',emoji:'🛠️',cor:'#22c55e',provider:'deepseek',model:'deepseek-chat',voiceHint:['daniel','antonio','google português','microsoft'],rate:1.7,pitch:.95,system:'Você é Pedrinho (Dr. Pedro), dev de Expert Advisors MQL5 para MetaTrader 5 no TRIVIUM369. Código pronto pra colar, objetivo, comentado. Sala em grupo — direto. PT-BR.'},
-  kairos:{nome:'Kairos',emoji:'📊',cor:'#fb923c',provider:'openai',model:'gpt-4o',voiceHint:['daniel','antonio','google português','microsoft'],rate:1.7,pitch:1.0,system:'Você é Kairos, orquestrador de trading do TRIVIUM369: setups, níveis, confluências, risco/retorno. Pragmático e rápido. Pares EURUSD, GBPUSD, XAUUSD, BTCUSD. Sala em grupo — curto. PT-BR.'},
-  marcao:{nome:'Marcão',emoji:'🛡️',cor:'#ef4444',provider:'grok',model:'grok-2',voiceHint:['daniel','antonio','google português','microsoft'],rate:1.65,pitch:.9,system:'Você é Marcão, disciplina e gestão de risco do TRIVIUM369. O durão que protege o capital: pergunta o stop, corta euforia, exige plano e tamanho coerente. Firme, a favor do Ronei. Sala em grupo — seco. PT-BR.'},
-  chatinha:{nome:'Chatinha',emoji:'🌸',cor:'#a78bfa',provider:'gemini',model:'gemini-2.0-flash',voiceHint:['thalita','maria','luciana','francisca','google português','feminin','female'],rate:1.7,pitch:1.08,system:'Você é Chatinha, secretária e organização do TRIVIUM369: conversa leve, resumos, agenda, lembretes, traduções. Acolhedora e prática. Sala em grupo. PT-BR.'}
+  claudio:{nome:'Claudio',emoji:'🧠',cor:'#6366f1',provider:'anthropic',model:'claude-opus-4-8',voiceHint:['daniel','luciana','google português','microsoft'],rate:1.5,pitch:1.0,system:'Você é Claudio, arquiteto-chefe do TRIVIUM369: raciocínio longo, arquitetura, código complexo e revisão crítica. Analítico, claro, dá recomendação direta. Você está numa MESA REDONDA com Ronei (o humano no comando) e os colegas Pedrinho, Kairos, Marcão e Chatinha — você vê o que cada um disse e pode concordar, discordar ou complementar, citando o colega pelo nome. Seja conciso como num chat. PT-BR.'},
+  pedrinho:{nome:'Pedrinho',emoji:'🛠️',cor:'#22c55e',provider:'deepseek',model:'deepseek-chat',voiceHint:['daniel','antonio','google português','microsoft'],rate:1.7,pitch:.95,system:'Você é Pedrinho (Dr. Pedro), dev de Expert Advisors MQL5 para MetaTrader 5 no TRIVIUM369. Numa MESA REDONDA com Ronei e os colegas Claudio, Kairos, Marcão e Chatinha — você vê o que cada um disse e responde a eles pelo nome. Código pronto pra colar, objetivo, comentado. Direto. PT-BR.'},
+  kairos:{nome:'Kairos',emoji:'📊',cor:'#fb923c',provider:'openai',model:'gpt-4o',voiceHint:['daniel','antonio','google português','microsoft'],rate:1.7,pitch:1.0,system:'Você é Kairos, orquestrador de trading do TRIVIUM369: setups, níveis, confluências, risco/retorno. Numa MESA REDONDA com Ronei e os colegas Claudio, Pedrinho, Marcão e Chatinha — vê o que cada um disse e dialoga com eles pelo nome. Pragmático e rápido. Pares EURUSD, GBPUSD, XAUUSD, BTCUSD. Curto. PT-BR.'},
+  marcao:{nome:'Marcão',emoji:'🛡️',cor:'#ef4444',provider:'grok',model:'grok-2',voiceHint:['daniel','antonio','google português','microsoft'],rate:1.65,pitch:.9,system:'Você é Marcão, disciplina e gestão de risco do TRIVIUM369. O durão que protege o capital: pergunta o stop, corta euforia, exige plano e tamanho coerente. Numa MESA REDONDA com Ronei e os colegas — vê o que cada um disse e cobra eles pelo nome quando preciso. Firme, a favor do Ronei. Seco. PT-BR.'},
+  chatinha:{nome:'Chatinha',emoji:'🌸',cor:'#a78bfa',provider:'gemini',model:'gemini-2.0-flash',voiceHint:['thalita','maria','luciana','francisca','google português','feminin','female'],rate:1.7,pitch:1.08,system:'Você é Chatinha, secretária e organização do TRIVIUM369: conversa leve, resumos, agenda, lembretes, traduções. Numa MESA REDONDA com Ronei e os colegas — vê tudo e ajuda a organizar o que foi dito, citando os colegas pelo nome. Acolhedora e prática. PT-BR.'}
 };
 var ORDER=['claudio','pedrinho','kairos','marcao','chatinha'];
 var BASEURL={openai:'https://api.openai.com/v1',deepseek:'https://api.deepseek.com/v1',grok:'https://api.x.ai/v1'};
 var PROVLBL={anthropic:'Claude',openai:'ChatGPT',deepseek:'DeepSeek',grok:'Grok',gemini:'Gemini'};
 var destinos=new Set(['claudio']);
-var historico={}, threads={}, zTop=100;
+var salaLog=[];           // {from:'ronei'|agentId, text}
+var zTop=100, autoOuvir=false;
 var semCod=false,semEnd=false,semUrl=false;
+var ocupado=false;
 
 /* ═══════════ VOZES ═══════════ */
 var vozes=[];
@@ -170,7 +164,7 @@ function vozDe(id){ var ag=AGENTS[id]; if(!vozes.length) vozes=speechSynthesis.g
 function rateDe(id){ return parseFloat(localStorage.getItem('triv_rate_'+id))||AGENTS[id].rate; }
 function pitchDe(id){ return parseFloat(localStorage.getItem('triv_pitch_'+id))||AGENTS[id].pitch; }
 
-/* ═══════════ HELPERS TEXTO ═══════════ */
+/* ═══════════ TEXTO ═══════════ */
 function escHTML(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function stripUrls(t){ return t.replace(/https?:\/\/[^\s<>"'»«\]]+/g,'').replace(/www\.[^\s<>"'»«\]]+/g,'').replace(/\s{2,}/g,' ').trim(); }
 function removeEmojis(t){ return t.replace(/(\ud83c[\udc00-\udfff]|\ud83d[\udc00-\udfff]|\ud83e[\udc00-\udfff]|\ud83f[\udc00-\udfff])/g,'').replace(/[☀-➿]/g,'').trim(); }
@@ -214,8 +208,7 @@ function renderMsg(raw){
 }
 
 /* ═══════════ TTS ═══════════ */
-function falar(text,id){
-  speechSynthesis.cancel();
+function _utt(text,id,fila){
   var t=text;
   if(semCod) t=t.replace(/```[\s\S]*?```/g,' ').replace(/`[^`\n]+`/g,' ');
   if(semEnd) t=stripEnderecos(t);
@@ -223,86 +216,148 @@ function falar(text,id){
   t=removeEmojis(stripJunk(t)); if(!t.trim()) return;
   var u=new SpeechSynthesisUtterance(t); u.lang='pt-BR'; u.rate=rateDe(id); u.pitch=pitchDe(id);
   var v=vozDe(id); if(v) u.voice=v;
-  setStatus('🔊 '+AGENTS[id].nome+'…'); u.onend=u.onerror=function(){ setStatus(''); };
   speechSynthesis.speak(u);
 }
+function falar(text,id){ speechSynthesis.cancel(); _utt(text,id,false); }   // ouvir agora
+function falarFila(text,id){ _utt(text,id,true); }                         // enfileira (auto)
 function pararFala(){ speechSynthesis.cancel(); setStatus(''); }
 
-/* ═══════════ JANELAS (drag + recolher) ═══════════ */
+/* ═══════════ JANELA (drag + recolher) ═══════════ */
 function layout(){ try{ return JSON.parse(localStorage.getItem('triv_layout')||'{}'); }catch(x){ return {}; } }
-function salvarLayout(o){ try{ localStorage.setItem('triv_layout', JSON.stringify(o)); }catch(x){} }
+function salvarLayout(o){ try{ localStorage.setItem('triv_layout',JSON.stringify(o)); }catch(x){} }
 function setPos(el,x,y){ el.style.left=Math.max(0,x)+'px'; el.style.top=Math.max(0,y)+'px'; }
 function frente(el){ el.style.zIndex=++zTop; document.querySelectorAll('.win').forEach(function(w){w.classList.remove('foco');}); el.classList.add('foco'); }
-function persistir(id,el){ var L=layout(); L[id]=L[id]||{}; var r=el.getBoundingClientRect(); var cv=document.getElementById('canvas').getBoundingClientRect(); L[id].x=parseInt(el.style.left)||0; L[id].y=parseInt(el.style.top)||0; L[id].w=el.querySelector('.body')?el.querySelector('.body').style.width:''; L[id].h=el.querySelector('.body')?el.querySelector('.body').style.height:''; L[id].col=el.classList.contains('col'); salvarLayout(L); }
+function persistir(id,el){ var L=layout(); var b=el.querySelector('.body'); L[id]={x:parseInt(el.style.left)||0,y:parseInt(el.style.top)||0,w:b?b.style.width:'',h:b?b.style.height:'',col:el.classList.contains('col')}; salvarLayout(L); }
 function arrastavel(el,id){
-  var bar=el.querySelector('.tbar'); var sx,sy,ox,oy,moved;
+  var bar=el.querySelector('.tbar'), sx,sy,ox,oy,moved;
   bar.addEventListener('pointerdown',function(e){
     if(e.target.closest('.wbtn')) return;
     frente(el); moved=false; sx=e.clientX; sy=e.clientY; ox=parseInt(el.style.left)||0; oy=parseInt(el.style.top)||0;
     bar.setPointerCapture(e.pointerId);
-    function mv(ev){ var dx=ev.clientX-sx, dy=ev.clientY-sy; if(Math.abs(dx)+Math.abs(dy)>3) moved=true; setPos(el, ox+dx, oy+dy); }
-    function up(ev){ bar.releasePointerCapture(e.pointerId); bar.removeEventListener('pointermove',mv); bar.removeEventListener('pointerup',up); if(moved) persistir(id,el); }
+    function mv(ev){ var dx=ev.clientX-sx,dy=ev.clientY-sy; if(Math.abs(dx)+Math.abs(dy)>3) moved=true; setPos(el,ox+dx,oy+dy); }
+    function up(){ try{bar.releasePointerCapture(e.pointerId);}catch(x){} bar.removeEventListener('pointermove',mv); bar.removeEventListener('pointerup',up); if(moved) persistir(id,el); }
     bar.addEventListener('pointermove',mv); bar.addEventListener('pointerup',up);
   });
 }
-function recolher(id,el){ el.classList.toggle('col'); el.querySelector('.cl-ico').textContent = el.classList.contains('col')?'▸':'▾'; persistir(id,el); }
+function recolher(id){ var el=document.getElementById(id==='dock'?'dock':id==='sala'?'sala':id); el.classList.toggle('col'); var ic=el.querySelector('.cl-ico'); if(ic) ic.textContent=el.classList.contains('col')?'▸':'▾'; persistir(id,el); }
 
-/* ═══════════ PAINEL DE AGENTE ═══════════ */
-function criarPainel(id){
-  var ag=AGENTS[id], cv=document.getElementById('canvas');
-  var el=document.createElement('div'); el.className='win'; el.id='win-'+id; el.style.setProperty('--wc',ag.cor); el.style.setProperty('--wbg',ag.cor+'18');
-  el.innerHTML=
-    '<div class="tbar">'+
-      '<span class="ttl">'+ag.emoji+' '+ag.nome+' <span class="prov">'+(PROVLBL[ag.provider]||'')+'</span> <span class="api" id="api-'+id+'"></span></span>'+
-      '<span class="tsp"></span>'+
-      '<button class="wbtn" title="Ouvir última" onclick="ouvirUltima(\''+id+'\')">🔊</button>'+
-      '<button class="wbtn" title="Limpar" onclick="limparPainel(\''+id+'\')">🗑</button>'+
-      '<button class="wbtn cl-ico" title="Recolher" onclick="recolher(\''+id+'\',document.getElementById(\'win-'+id+'\'))">▾</button>'+
-    '</div>'+
-    '<div class="body" id="body-'+id+'"><div class="vaziop">sem mensagens</div></div>';
-  cv.appendChild(el);
-  // título recolhe ao duplo-clique também
-  el.querySelector('.ttl').addEventListener('dblclick',function(){ recolher(id,el); });
-  arrastavel(el,id);
-  el.addEventListener('pointerdown',function(){ frente(el); });
-  return el;
+/* ═══════════ SALA (janela compartilhada) ═══════════ */
+function criarSala(){
+  var cv=document.getElementById('canvas');
+  var el=document.createElement('div'); el.className='win'; el.id='sala'; el.style.setProperty('--wc','#8ea2ff'); el.style.setProperty('--wbg','rgba(99,102,241,.12)');
+  el.innerHTML='<div class="tbar"><span class="ttl">🜲 Sala — todos juntos</span><span class="tsp"></span>'+
+    '<button class="wbtn" title="Parar fala" onclick="pararFala()">⏹</button>'+
+    '<button class="wbtn" title="Limpar conversa" onclick="limparSala()">🗑</button>'+
+    '<button class="wbtn cl-ico" title="Recolher" onclick="recolher(\'sala\')">▾</button></div>'+
+    '<div class="body" id="sala-body"><div class="vaziop">🜲 Mesa redonda do TRIVIUM369.<br>Escolha quem responde (1–5 ou Todos), fale 🎙 ou escreva, e mande.<br>Os agentes veem a conversa e dialogam entre si.</div></div>';
+  cv.appendChild(el); arrastavel(el,'sala'); el.addEventListener('pointerdown',function(){ frente(el); });
 }
-function bodyDe(id){ return document.getElementById('body-'+id); }
-function addLinha(id,kind,text,pend){
-  var b=bodyDe(id); var v=b.querySelector('.vaziop'); if(v) v.remove();
-  var ln=document.createElement('div'); ln.className='line '+(kind==='voce'?'voce':'ag');
-  var who=document.createElement('div'); who.className='who'; who.textContent=kind==='voce'?'Você':AGENTS[id].nome;
-  var tx=document.createElement('div'); tx.className='txt'+(pend?' pend':'');
-  if(kind==='voce') tx.textContent=text; else tx.innerHTML=pend?escHTML(text):renderMsg(text);
-  ln.appendChild(who); ln.appendChild(tx);
-  if(kind==='ag'&&!pend) ln.appendChild(miniAcoes(id,text));
+function addLinha(from,text,pend){
+  var b=document.getElementById('sala-body'); var v=b.querySelector('.vaziop'); if(v) v.remove();
+  var ronei=(from==='ronei');
+  var ln=document.createElement('div'); ln.className='line '+(ronei?'ronei':'ag');
+  ln.style.setProperty('--lc', ronei?'#34d399':AGENTS[from].cor);
+  var who=document.createElement('div'); who.className='who'; who.textContent=ronei?'Você ▸':(AGENTS[from].emoji+' '+AGENTS[from].nome);
+  var bub=document.createElement('div'); bub.className='bub'+(pend?' pend':'');
+  if(ronei) bub.textContent=text; else bub.innerHTML=pend?escHTML(text):renderMsg(text);
+  ln.appendChild(who); ln.appendChild(bub);
+  if(!ronei&&!pend) ln.appendChild(miniAcoes(from,text));
   b.appendChild(ln); b.scrollTop=b.scrollHeight;
-  return {ln:ln,tx:tx};
+  return {ln:ln,bub:bub};
 }
 function miniAcoes(id,text){ var d=document.createElement('div'); d.className='mini';
   var a=document.createElement('button'); a.className='mbtn2'; a.textContent='🔊'; a.onclick=function(){ falar(text,id); };
   var c=document.createElement('button'); c.className='mbtn2'; c.textContent='📋'; c.onclick=function(){ navigator.clipboard.writeText(text); setStatus('✅ copiado'); };
   d.appendChild(a); d.appendChild(c); return d; }
-function ouvirUltima(id){ var t=(threads[id]||[]).filter(function(m){return m.k==='ag';}).slice(-1)[0]; if(t) falar(t.text,id); else setStatus('nada pra ouvir'); }
-function limparPainel(id){ threads[id]=[]; historico[id]=[]; salvarThreads(); bodyDe(id).innerHTML='<div class="vaziop">sem mensagens</div>'; }
-function salvarThreads(){ try{ var o={}; ORDER.forEach(function(id){ o[id]=(threads[id]||[]).slice(-40); }); localStorage.setItem('triv_threads',JSON.stringify(o)); }catch(x){} }
+function limparSala(){ pararFala(); salaLog=[]; salvarSala(); document.getElementById('sala-body').innerHTML='<div class="vaziop">Conversa limpa. Manda a próxima. 🜲</div>'; }
+function salvarSala(){ try{ localStorage.setItem('triv_sala', JSON.stringify(salaLog.slice(-120))); }catch(x){} }
+function restaurarSala(){ var raw=''; try{ raw=localStorage.getItem('triv_sala')||''; }catch(x){} if(!raw) return; try{ salaLog=JSON.parse(raw)||[]; }catch(x){ salaLog=[]; } salaLog.forEach(function(m){ addLinha(m.from,m.text); }); }
+
+/* ═══════════ CONTEXTO COMPARTILHADO ═══════════ */
+function contextoPara(id){
+  var msgs=[];
+  salaLog.slice(-40).forEach(function(e){
+    if(e.from===id){ msgs.push({role:'assistant',content:e.text}); }
+    else{ var nome=(e.from==='ronei')?'Ronei':AGENTS[e.from].nome; msgs.push({role:'user',content:nome+': '+e.text}); }
+  });
+  var out=[]; msgs.forEach(function(m){ if(out.length&&out[out.length-1].role===m.role) out[out.length-1].content+='\n\n'+m.content; else out.push({role:m.role,content:m.content}); });
+  if(!out.length||out[0].role==='assistant') out.unshift({role:'user',content:'(início da sala)'});
+  return out;
+}
+
+/* ═══════════ LLM ═══════════ */
+function temChave(id){ return !!localStorage.getItem('triv_key_'+id); }
+function chave(id){ return localStorage.getItem('triv_key_'+id)||''; }
+function modeloDe(id){ return localStorage.getItem('triv_model_'+id)||AGENTS[id].model; }
+async function chamarLLM(id){
+  var ag=AGENTS[id],key=chave(id),model=modeloDe(id), ctx=contextoPara(id), resp='';
+  if(ag.provider==='anthropic'){
+    var r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'content-type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:model,max_tokens:4096,system:ag.system,messages:ctx})});
+    if(!r.ok) throw new Error('Anthropic '+r.status+' '+(await r.text()).slice(0,110)); var d=await r.json(); resp=(d.content||[]).map(function(b){return b.text||'';}).join('');
+  }else if(ag.provider==='gemini'){
+    var url='https://generativelanguage.googleapis.com/v1beta/models/'+model+':generateContent?key='+encodeURIComponent(key);
+    var contents=ctx.map(function(m){return {role:m.role==='assistant'?'model':'user',parts:[{text:m.content}]};});
+    var rg=await fetch(url,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({systemInstruction:{parts:[{text:ag.system}]},contents:contents})});
+    if(!rg.ok) throw new Error('Gemini '+rg.status+' '+(await rg.text()).slice(0,110)); var dg=await rg.json(); resp=((dg.candidates&&dg.candidates[0]&&dg.candidates[0].content&&dg.candidates[0].content.parts)||[]).map(function(p){return p.text||'';}).join('');
+  }else{
+    var base=BASEURL[ag.provider]||BASEURL.openai;
+    var ro=await fetch(base+'/chat/completions',{method:'POST',headers:{'content-type':'application/json','authorization':'Bearer '+key},body:JSON.stringify({model:model,messages:[{role:'system',content:ag.system}].concat(ctx)})});
+    if(!ro.ok) throw new Error(ag.provider+' '+ro.status+' '+(await ro.text()).slice(0,110)); var dox=await ro.json(); resp=dox.choices[0].message.content;
+  }
+  return resp;
+}
+
+/* faz um agente responder à sala atual (sequencial → eles se ouvem) */
+async function responder(id){
+  var pend=addLinha(id,'…',true);
+  try{
+    var r=await chamarLLM(id);
+    pend.bub.classList.remove('pend'); pend.bub.innerHTML=renderMsg(r); pend.ln.appendChild(miniAcoes(id,r));
+    salaLog.push({from:id,text:r}); salvarSala(); document.getElementById('sala-body').scrollTop=document.getElementById('sala-body').scrollHeight;
+    if(autoOuvir) falarFila(r,id);
+  }catch(e){ pend.bub.classList.remove('pend'); pend.bub.classList.add('erro'); pend.bub.textContent='❌ '+e.message; }
+}
+
+async function enviar(){
+  if(ocupado) return;
+  var ent=document.getElementById('entrada'); var txt=ent.value.trim(); if(!txt) return;
+  ent.value=''; ent.style.height='auto';
+  salaLog.push({from:'ronei',text:txt}); addLinha('ronei',txt); salvarSala();
+  var alvos=ORDER.filter(function(id){ return destinos.has(id); });
+  if(!alvos.length){ setStatus('escolha quem responde (1–5)','err'); return; }
+  var semCh=alvos.filter(function(id){ return !temChave(id); });
+  semCh.forEach(function(id){ var b=addLinha(id,'sem chave API — configure em ⚙',false); b.bub.classList.add('erro'); });
+  var comChave=alvos.filter(temChave);
+  if(!comChave.length){ setStatus('nenhum selecionado tem chave — ⚙','err'); abrirConfig(); return; }
+  ocupado=true; if(autoOuvir) speechSynthesis.cancel();
+  for(var i=0;i<comChave.length;i++){ setStatus('⏳ '+AGENTS[comChave[i]].nome+' falando…','on'); await responder(comChave[i]); } // sequencial: cada um vê o anterior
+  ocupado=false; setStatus('pronto');
+}
+
+/* mais uma rodada: os agentes selecionados reagem ao que já foi dito (sem nova fala do Ronei) */
+async function rodada(){
+  if(ocupado){ return; }
+  if(!salaLog.length){ setStatus('mande algo primeiro',''); return; }
+  var comChave=ORDER.filter(function(id){ return destinos.has(id)&&temChave(id); });
+  if(!comChave.length){ setStatus('selecione quem debate (com chave)','err'); return; }
+  ocupado=true; if(autoOuvir) speechSynthesis.cancel();
+  for(var i=0;i<comChave.length;i++){ setStatus('🗣️ '+AGENTS[comChave[i]].nome+' rebatendo…','on'); await responder(comChave[i]); }
+  ocupado=false; setStatus('pronto');
+}
 
 /* ═══════════ DOCK ═══════════ */
 function criarDock(){
   var cv=document.getElementById('canvas');
   var el=document.createElement('div'); el.className='win'; el.id='dock';
-  el.innerHTML=
-    '<div class="tbar"><span class="ttl">🎙 Ronei — sua estação</span><span class="tsp"></span>'+
-      '<button class="wbtn cl-ico" title="Recolher" onclick="recolher(\'dock\',document.getElementById(\'dock\'))">▾</button></div>'+
+  el.innerHTML='<div class="tbar"><span class="ttl">🎙 Ronei — sua estação</span><span class="tsp"></span>'+
+    '<button class="wbtn cl-ico" title="Recolher" onclick="recolher(\'dock\')">▾</button></div>'+
     '<div class="body"><div id="chips"></div>'+
       '<div class="docrow">'+
         '<button class="cbig" id="mic" onclick="toggleMic()" title="Ditar (Espaço)">🎙</button>'+
         '<textarea id="entrada" rows="1" placeholder="Fale ou escreva para a sala…"></textarea>'+
         '<button class="cbig" id="send" onclick="enviar()" title="Enviar (Enter)">➤</button>'+
-      '</div><div id="interim"></div></div>';
-  cv.appendChild(el);
-  arrastavel(el,'dock');
-  el.addEventListener('pointerdown',function(){ frente(el); });
+      '</div><button id="rodada" onclick="rodada()" title="Os selecionados reagem ao que já foi dito">🗣️ mais uma rodada</button><div id="interim"></div></div>';
+  cv.appendChild(el); arrastavel(el,'dock'); el.addEventListener('pointerdown',function(){ frente(el); });
   var ent=el.querySelector('#entrada');
   ent.addEventListener('input',function(){ this.style.height='auto'; this.style.height=Math.min(this.scrollHeight,160)+'px'; if(!gravando) baseTxt=this.value; });
   ent.addEventListener('keydown',function(e){ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); enviar(); } });
@@ -316,58 +371,10 @@ function montarChips(){
 function toggleDestino(id){ if(destinos.has(id)) destinos.delete(id); else destinos.add(id); if(destinos.size===0) destinos.add(id); montarChips(); }
 function toggleTodos(){ destinos = destinos.size===ORDER.length ? new Set(['claudio']) : new Set(ORDER.slice()); montarChips(); }
 
-/* ═══════════ LLM ═══════════ */
-function temChave(id){ return !!localStorage.getItem('triv_key_'+id); }
-function chave(id){ return localStorage.getItem('triv_key_'+id)||''; }
-function modeloDe(id){ return localStorage.getItem('triv_model_'+id)||AGENTS[id].model; }
-async function chamarLLM(id,texto){
-  var ag=AGENTS[id],key=chave(id),model=modeloDe(id);
-  if(!historico[id]) historico[id]=[]; var hist=historico[id]; hist.push({role:'user',content:texto}); var resp='';
-  if(ag.provider==='anthropic'){
-    var r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'content-type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:model,max_tokens:4096,system:ag.system,messages:hist})});
-    if(!r.ok) throw new Error('Anthropic '+r.status+' '+(await r.text()).slice(0,110)); var d=await r.json(); resp=(d.content||[]).map(function(b){return b.text||'';}).join('');
-  }else if(ag.provider==='gemini'){
-    var url='https://generativelanguage.googleapis.com/v1beta/models/'+model+':generateContent?key='+encodeURIComponent(key);
-    var contents=hist.map(function(m){return {role:m.role==='assistant'?'model':'user',parts:[{text:m.content}]};});
-    var rg=await fetch(url,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({systemInstruction:{parts:[{text:ag.system}]},contents:contents})});
-    if(!rg.ok) throw new Error('Gemini '+rg.status+' '+(await rg.text()).slice(0,110)); var dg=await rg.json(); resp=((dg.candidates&&dg.candidates[0]&&dg.candidates[0].content&&dg.candidates[0].content.parts)||[]).map(function(p){return p.text||'';}).join('');
-  }else{
-    var base=BASEURL[ag.provider]||BASEURL.openai;
-    var ro=await fetch(base+'/chat/completions',{method:'POST',headers:{'content-type':'application/json','authorization':'Bearer '+key},body:JSON.stringify({model:model,messages:[{role:'system',content:ag.system}].concat(hist)})});
-    if(!ro.ok) throw new Error(ag.provider+' '+ro.status+' '+(await ro.text()).slice(0,110)); var dox=await ro.json(); resp=dox.choices[0].message.content;
-  }
-  hist.push({role:'assistant',content:resp}); if(hist.length>20) historico[id]=hist.slice(-20); return resp;
-}
-async function enviar(){
-  var ent=document.getElementById('entrada'); var txt=ent.value.trim(); if(!txt) return;
-  ent.value=''; ent.style.height='auto';
-  var alvos=ORDER.filter(function(id){ return destinos.has(id); });
-  if(!alvos.length){ setStatus('escolha quem responde (1–5)','err'); return; }
-  var comChave=alvos.filter(temChave), semCh=alvos.filter(function(id){return !temChave(id);});
-  alvos.forEach(function(id){ // mostra sua fala no painel de cada alvo
-    if(!document.getElementById('win-'+id)) return;
-    threads[id]=threads[id]||[]; threads[id].push({k:'voce',text:txt}); addLinha(id,'voce',txt);
-    if(el_col(id)) recolher(id,document.getElementById('win-'+id)); // expande se estava recolhido
-  });
-  semCh.forEach(function(id){ var b=addLinha(id,'ag','sem chave API — configure em ⚙',false); b.tx.classList.add('erro'); });
-  salvarThreads();
-  if(!comChave.length){ setStatus('nenhum selecionado tem chave — ⚙','err'); abrirConfig(); return; }
-  setStatus('⏳ '+comChave.map(function(id){return AGENTS[id].nome;}).join(', ')+'…','on');
-  var pend={}; comChave.forEach(function(id){ pend[id]=addLinha(id,'ag','…',true); });
-  await Promise.all(comChave.map(function(id){
-    return chamarLLM(id,txt).then(function(r){
-      pend[id].tx.classList.remove('pend'); pend[id].tx.innerHTML=renderMsg(r); pend[id].ln.appendChild(miniAcoes(id,r));
-      threads[id].push({k:'ag',text:r}); salvarThreads(); bodyDe(id).scrollTop=bodyDe(id).scrollHeight;
-      if(comChave.length===1) falar(r,id);
-    }).catch(function(e){ pend[id].tx.classList.remove('pend'); pend[id].tx.classList.add('erro'); pend[id].tx.textContent='❌ '+e.message; });
-  }));
-  setStatus('pronto');
-}
-function el_col(id){ var w=document.getElementById('win-'+id); return w&&w.classList.contains('col'); }
-
-/* ═══════════ SUPRESSÃO ═══════════ */
+/* ═══════════ SUPRESSÃO / AUTO ═══════════ */
 function toggleSup(t){ if(t==='cod')semCod=!semCod; else if(t==='end')semEnd=!semEnd; else if(t==='url')semUrl=!semUrl;
   document.getElementById('t-cod').classList.toggle('on',semCod); document.getElementById('t-end').classList.toggle('on',semEnd); document.getElementById('t-url').classList.toggle('on',semUrl); }
+function toggleAuto(){ autoOuvir=!autoOuvir; document.getElementById('t-spk').classList.toggle('on',autoOuvir); setStatus(autoOuvir?'auto-ouvir ligado':'auto-ouvir desligado'); }
 
 /* ═══════════ DITADO ═══════════ */
 var SR=window.SpeechRecognition||window.webkitSpeechRecognition, rec=null, gravando=false, baseTxt='';
@@ -401,44 +408,27 @@ function fecharConfig(){ document.getElementById('modal').classList.remove('on')
 function salvarConfig(){ ORDER.forEach(function(id){ var k=document.getElementById('cfg-key-'+id).value.trim(); var m=document.getElementById('cfg-model-'+id).value.trim(); var v=document.getElementById('cfg-voice-'+id).value;
     if(k) localStorage.setItem('triv_key_'+id,k); else localStorage.removeItem('triv_key_'+id);
     if(m) localStorage.setItem('triv_model_'+id,m);
-    if(v) localStorage.setItem('triv_voice_'+id,v); else localStorage.removeItem('triv_voice_'+id);
-    var api=document.getElementById('api-'+id); if(api) api.className='api'+(k?' ok':''); });
+    if(v) localStorage.setItem('triv_voice_'+id,v); else localStorage.removeItem('triv_voice_'+id); });
   montarChips(); fecharConfig(); setStatus('✅ salvo');
 }
 
 /* ═══════════ LAYOUT / INIT ═══════════ */
-function aplicarLayout(){
-  var L=layout();
-  ORDER.concat(['dock']).forEach(function(id){
-    var el=document.getElementById(id==='dock'?'dock':'win-'+id); if(!el) return;
-    if(L[id]){ setPos(el,L[id].x,L[id].y); var b=el.querySelector('.body'); if(b){ if(L[id].w)b.style.width=L[id].w; if(L[id].h)b.style.height=L[id].h; } if(L[id].col){ el.classList.add('col'); var ic=el.querySelector('.cl-ico'); if(ic) ic.textContent='▸'; } }
-  });
-  if(!Object.keys(L).length) organizar();
+function aplicarLayout(){ var L=layout(); ['sala','dock'].forEach(function(id){ var el=document.getElementById(id); if(!el) return;
+    if(L[id]){ setPos(el,L[id].x,L[id].y); var b=el.querySelector('.body'); if(b){ if(L[id].w)b.style.width=L[id].w; if(L[id].h)b.style.height=L[id].h; } if(L[id].col){ el.classList.add('col'); var ic=el.querySelector('.cl-ico'); if(ic) ic.textContent='▸'; } } });
+  if(!L.sala||!L.dock) organizar();
 }
 function organizar(){
-  var cv=document.getElementById('canvas'); var W=cv.clientWidth, H=cv.clientHeight;
-  var pw=Math.min(330, Math.max(250,(W-48)/Math.min(ORDER.length,3))-8), gap=12, dockH=170;
-  var cols=Math.max(1,Math.floor((W-gap)/(pw+gap)));
-  ORDER.forEach(function(id,i){
-    var el=document.getElementById('win-'+id); if(!el) return;
-    el.classList.remove('col'); var ic=el.querySelector('.cl-ico'); if(ic) ic.textContent='▾';
-    var r=Math.floor(i/cols), c=i%cols;
-    var availH=H-dockH-gap*2; var ph=Math.max(150,(availH-gap*(Math.ceil(ORDER.length/cols)-1))/Math.ceil(ORDER.length/cols));
-    var b=el.querySelector('.body'); b.style.width=(pw-2)+'px'; b.style.height=ph+'px';
-    setPos(el, gap+c*(pw+gap), gap+r*(ph+46+gap));
-  });
-  var dock=document.getElementById('dock'); var dw=Math.min(620,W-2*gap);
-  dock.classList.remove('col'); var di=dock.querySelector('.cl-ico'); if(di) di.textContent='▾';
-  dock.querySelector('.body').style.width=dw+'px';
-  setPos(dock, (W-dw)/2, H-dockH-gap);
-  // salvar
-  var Lo={}; ORDER.concat(['dock']).forEach(function(id){ var el=document.getElementById(id==='dock'?'dock':'win-'+id); if(!el) return; var bb=el.querySelector('.body'); Lo[id]={x:parseInt(el.style.left)||0,y:parseInt(el.style.top)||0,w:bb?bb.style.width:'',h:bb?bb.style.height:'',col:false}; });
-  salvarLayout(Lo);
+  var cv=document.getElementById('canvas'), W=cv.clientWidth, H=cv.clientHeight, gap=12, dockH=178;
+  var sala=document.getElementById('sala'); sala.classList.remove('col'); var si=sala.querySelector('.cl-ico'); if(si) si.textContent='▾';
+  var sw=Math.min(820,W-2*gap), sh=H-dockH-3*gap-46;
+  var sb=sala.querySelector('.body'); sb.style.width=sw+'px'; sb.style.height=Math.max(160,sh)+'px'; setPos(sala,(W-sw)/2,gap);
+  var dock=document.getElementById('dock'); dock.classList.remove('col'); var di=dock.querySelector('.cl-ico'); if(di) di.textContent='▾';
+  var dw=Math.min(660,W-2*gap); dock.querySelector('.body').style.width=dw+'px'; setPos(dock,(W-dw)/2,H-dockH-gap);
+  var Lo={}; ['sala','dock'].forEach(function(id){ var el=document.getElementById(id); var bb=el.querySelector('.body'); Lo[id]={x:parseInt(el.style.left)||0,y:parseInt(el.style.top)||0,w:bb.style.width,h:bb.style.height,col:false}; }); salvarLayout(Lo);
 }
-function restaurarThreads(){ var raw=''; try{ raw=localStorage.getItem('triv_threads')||''; }catch(x){} if(!raw) return; var o; try{o=JSON.parse(raw);}catch(x){return;} ORDER.forEach(function(id){ if(o[id]&&o[id].length){ threads[id]=o[id]; o[id].forEach(function(m){ addLinha(id,m.k==='voce'?'voce':'ag',m.text); }); } }); }
 
 document.addEventListener('keydown',function(e){
-  var dig=document.activeElement, naDigit=dig&&(dig.tagName==='TEXTAREA'||dig.tagName==='INPUT'||dig.tagName==='SELECT');
+  var d=document.activeElement, naDigit=d&&(d.tagName==='TEXTAREA'||d.tagName==='INPUT'||d.tagName==='SELECT');
   if(e.code==='Escape'){ if(document.getElementById('modal').classList.contains('on')) fecharConfig(); else pararFala(); return; }
   if(naDigit) return;
   if(e.code==='Space'){ e.preventDefault(); toggleMic(); return; }
@@ -446,11 +436,10 @@ document.addEventListener('keydown',function(e){
   if(e.key==='t'||e.key==='T'){ toggleTodos(); }
 });
 document.getElementById('modal').addEventListener('click',function(e){ if(e.target.id==='modal') fecharConfig(); });
-window.addEventListener('resize',function(){ /* mantém posições salvas; usuário pode reorganizar com ⊞ */ });
 
 (function init(){
-  ORDER.forEach(criarPainel); criarDock(); montarChips(); aplicarLayout(); restaurarThreads();
-  setStatus(SR?'pronto · Espaço dita · 1–5 escolhe quem responde · ⚙ chaves':'pronto · (ditado só Chrome/Edge) · ⚙ chaves');
+  criarSala(); criarDock(); montarChips(); aplicarLayout(); restaurarSala();
+  setStatus(SR?'pronto · Espaço dita · 1–5 quem responde · 🗣️ mais uma rodada · ⚙ chaves':'pronto · (ditado só Chrome/Edge) · ⚙ chaves');
 })();
 </script>
 </body>
