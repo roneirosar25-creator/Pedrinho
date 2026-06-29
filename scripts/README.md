@@ -1,4 +1,53 @@
-# 📊 COLETA_HISTORICO_TRIVIUM — Coleta de Histórico (MT5 / Admirals)
+# 📊 COLETA_HISTORICO_TRIVIUM — Coleta de Histórico (MT5)
+
+Script MQL5 que roda **uma vez** e baixa o histórico de candles direto do
+servidor da corretora para arquivos CSV.
+
+> 🆕 **Use a versão UNIVERSAL** (`COLETA_HISTORICO_TRIVIUM_UNIVERSAL.mq5`) —
+> ela serve para **qualquer plataforma MT5** (Admirals **e** MetaQuotes) só
+> mudando um input. Veja a seção logo abaixo. A versão antiga
+> (`COLETA_HISTORICO_TRIVIUM_FINAL.mq5`, com `-T` fixo) fica só como histórico.
+
+---
+
+## 🌐 COLETA_HISTORICO_TRIVIUM_UNIVERSAL.mq5 (recomendado — 2 plataformas)
+
+Mesmo script para as **duas** plataformas. O que muda entre elas é só o
+**nome dos símbolos**:
+
+| Plataforma | Símbolos | Input `SufixoAtivo` |
+|---|---|---|
+| **Admirals** | `EURUSD-T`, `XAUUSD-T` ... | `-T` |
+| **MetaQuotes-Demo** | `EURUSD`, `GBPUSD` ... | *(vazio)* `""` |
+
+**Como usar em cada terminal:**
+1. Copie `COLETA_HISTORICO_TRIVIUM_UNIVERSAL.mq5` para a pasta
+   `...\MQL5\Scripts\` **daquele** terminal.
+2. Compile (F7 no MetaEditor).
+3. Arraste o script pro gráfico → na janela de inputs, ajuste **`SufixoAtivo`**:
+   - Admirals → `-T`
+   - MetaQuotes → apague, deixe **vazio**
+4. Acompanhe o log em **Terminal (F12) → Experts**.
+
+**Detalhes importantes:**
+- Ativos que **não existem** naquela plataforma (ex: `XAUGBP` no MetaQuotes)
+  aparecem como **`[PULADO]`** e o script segue — não trava.
+- O log mostra a **corretora** e a **conta** no topo, pra você saber de qual
+  terminal vieram os dados.
+- A pasta de saída usa o **nome base** (ex: `DADOS_BRUTOS_EURUSD`) nas duas
+  plataformas; o **arquivo** mantém o nome completo (`M1_EURUSD-T.csv` na
+  Admirals, `M1_EURUSD.csv` no MetaQuotes).
+
+> ⚠️ **Mantenha os dados das duas plataformas SEPARADOS** ao consolidar.
+> Admirals e MetaQuotes são corretoras diferentes: preço, spread e horário do
+> servidor **não são idênticos**. Para o QA/análise, crie pastas distintas
+> (ex: `ADMIRALS/` e `METAQUOTES/`) e rode o `qa_consolida_dados.py` em cada
+> uma. Para backtest, use sempre os dados da **mesma** corretora onde o EA vai
+> operar.
+
+---
+
+## 📦 Versão original (Admirals, sufixo `-T` fixo)
 
 Script MQL5 que roda **uma vez** e baixa o histórico de candles direto do
 servidor da corretora (Admirals) para arquivos CSV.
