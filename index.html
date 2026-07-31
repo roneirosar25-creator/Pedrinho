@@ -90,13 +90,21 @@
         @media (max-width: 480px) { .header h1 { font-size: 16px; } .bubble { font-size: 12px; } }
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 2px; }
+        .tabs { display: flex; gap: 6px; padding: 8px 12px 0; flex-shrink: 0; }
+        .tab { flex: 1; text-align: center; padding: 8px; border-radius: 8px 8px 0 0; font-size: 12px; font-weight: 600; cursor: pointer; background: #111827; color: #9ca3af; border: 1px solid #3a3f5c; border-bottom: none; }
+        .tab.active { background: #1f2937; color: #a78bfa; }
     </style>
 </head>
 <body>
     <div class="header">
-        <div><h1>🤖 Pedrinho</h1></div>
-        <div class="header-badge">TRIVIUM369</div>
+        <div><h1 id="agentTitle">🤖 Pedrinho</h1></div>
+        <div class="header-badge" id="agentBadge">TRIVIUM369</div>
         <button class="btn" onclick="openSettings()">⚙️</button>
+    </div>
+
+    <div class="tabs">
+        <div class="tab active" id="tab-pedrinho" onclick="switchAgent('pedrinho')">🤖 Pedrinho</div>
+        <div class="tab" id="tab-claudio" onclick="switchAgent('claudio')">🛡️ Cláudio</div>
     </div>
 
     <div class="messages" id="messages"></div>
@@ -133,12 +141,12 @@
     </div>
 
     <script>
-        const CONTEXT = `You are Pedrinho (Dr. Pedro), the EA/MQL5 developer agent for TRIVIUM369, a trading automation project using MetaTrader 5 (MT5) via Admirals broker.
+        const CONTEXT_PEDRINHO = `You are Pedrinho (Dr. Pedro), the EA/MQL5 developer agent for TRIVIUM369, a trading automation project using MetaTrader 5 (MT5) via Admirals broker.
 
 TRIVIUM369 Architecture:
 - Kairos: Claude API-based trading intelligence orchestrator
 - Pedrinho/Dr. Pedro: MQL5/EA developer agent (you)
-- Risk Guard: Independent risk management agent
+- Cláudio: Independent risk management/validator agent
 - Obsidian: Memory/vault layer synchronized via Google Drive
 
 Key Trading Parameters:
@@ -163,7 +171,41 @@ Interaction Style:
 
 Respond in Portuguese when the user speaks Portuguese, English otherwise.`;
 
-        let messages = [];
+        const CONTEXT_CLAUDIO = `Você é Cláudio, estrategista e validador de risco do TRIVIUM369, um sistema de trading multi-agente (Kairos = orquestrador, Pedrinho = dev EA/MQL5, você = validação de risco).
+
+Seu papel:
+1. Receber sinais de entrada (ativo, preço de entrada, stop loss, take profit) reportados pelo Ronei em nome do Pedrinho/Kairos.
+2. Validar cada sinal: a relação risco/retorno faz sentido? O risco está dentro do limite combinado? Há correlação perigosa com outras operações já abertas no dia (ex.: mesmo ativo, ativos correlacionados, mesma direção)?
+3. Aprovar ou rejeitar a operação, sempre justificando o porquê em poucas linhas.
+4. Quando aprovar, indicar explicitamente que a informação deve seguir para o Nexus.
+
+Regras fixas de risco (não flexibilize sem confirmação explícita do Ronei):
+- Nunca aprovar um trade que arrisque mais do que o limite por trade combinado com o Ronei (percentual do capital do dia ou valor fixo — confirme qual está valendo).
+- Nunca aprovar operações overnight (todas as posições devem ser encerradas antes do fechamento/limite do dia).
+- Nunca permitir mais de 3 operações simultâneas abertas.
+- Se faltar informação para validar (capital do dia, limite por trade, SL/TP do sinal), pergunte antes de aprovar — nunca assuma.
+
+Estilo: direto, objetivo, decisivo. Sempre feche cada avaliação com um veredito claro: ✅ APROVADO ou ❌ REJEITADO, seguido do motivo. Responda em português.
+
+Você NÃO executa ordens — apenas valida e comunica a decisão para que o Nexus (ou o próprio Ronei) execute.`;
+
+        const AGENTS = {
+            pedrinho: {
+                title: '🤖 Pedrinho',
+                badge: 'TRIVIUM369',
+                context: CONTEXT_PEDRINHO,
+                greeting: '🚀 Opa! Pedrinho aqui. Bora conversar sobre TRIVIUM369?'
+            },
+            claudio: {
+                title: '🛡️ Cláudio',
+                badge: 'Risk Validator',
+                context: CONTEXT_CLAUDIO,
+                greeting: 'Ronei, qual é o capital máximo por trade? (% ou valor fixo?)'
+            }
+        };
+
+        let activeAgent = 'pedrinho';
+        const conversations = { pedrinho: [], claudio: [] };
         let apiKey = localStorage.getItem('pedrinho_key') || '';
         let obsURL = localStorage.getItem('pedrinho_obsURL') || 'http://localhost:27123';
         let obsToken = localStorage.getItem('pedrinho_token') || '';
@@ -207,6 +249,24 @@ Respond in Portuguese when the user speaks Portuguese, English otherwise.`;
             document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
         }
 
+        function switchAgent(id) {
+            if (!AGENTS[id] || id === activeAgent) return;
+            activeAgent = id;
+
+            document.getElementById('tab-pedrinho').classList.toggle('active', id === 'pedrinho');
+            document.getElementById('tab-claudio').classList.toggle('active', id === 'claudio');
+            document.getElementById('agentTitle').textContent = AGENTS[id].title;
+            document.getElementById('agentBadge').textContent = AGENTS[id].badge;
+
+            const messagesEl = document.getElementById('messages');
+            messagesEl.innerHTML = '';
+            if (conversations[id].length === 0) {
+                addMessage('assistant', AGENTS[id].greeting);
+            } else {
+                conversations[id].forEach(m => addMessage(m.role, m.content));
+            }
+        }
+
         async function send() {
             const input = document.getElementById('input');
             const text = input.value.trim();
@@ -214,7 +274,7 @@ Respond in Portuguese when the user speaks Portuguese, English otherwise.`;
 
             input.value = '';
             addMessage('user', text);
-            messages.push({ role: 'user', content: text });
+            conversations[activeAgent].push({ role: 'user', content: text });
 
             const loading = document.createElement('div');
             loading.className = 'message assistant loading';
@@ -237,8 +297,8 @@ Respond in Portuguese when the user speaks Portuguese, English otherwise.`;
                     body: JSON.stringify({
                         model: 'claude-sonnet-4-20250514',
                         max_tokens: 2000,
-                        system: CONTEXT,
-                        messages: messages
+                        system: AGENTS[activeAgent].context,
+                        messages: conversations[activeAgent]
                     })
                 });
 
@@ -249,7 +309,7 @@ Respond in Portuguese when the user speaks Portuguese, English otherwise.`;
 
                 const response = data.content[0].text;
                 addMessage('assistant', response);
-                messages.push({ role: 'assistant', content: response });
+                conversations[activeAgent].push({ role: 'assistant', content: response });
             } catch (e) {
                 const loading_el = document.getElementById('loading');
                 if (loading_el) loading_el.remove();
@@ -258,7 +318,7 @@ Respond in Portuguese when the user speaks Portuguese, English otherwise.`;
         }
 
         window.addEventListener('load', () => {
-            addMessage('assistant', '🚀 Opa! Pedrinho aqui. Bora conversar sobre TRIVIUM369?');
+            addMessage('assistant', AGENTS[activeAgent].greeting);
         });
 
         document.getElementById('modal').addEventListener('click', (e) => {
