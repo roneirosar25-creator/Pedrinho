@@ -1,6 +1,6 @@
 # 🤖 Pedrinho Mobile - TRIVIUM369
 
-Chat mobile para conversar com Pedrinho (Dr. Pedro), seu agente EA/MQL5 developer do TRIVIUM369.
+Chat mobile para conversar com os agentes do TRIVIUM369: Pedrinho (Dr. Pedro), o EA/MQL5 developer, e Cláudio, o estrategista/validador de risco. Use as abas no topo para alternar entre eles.
 
 ## 🚀 Features
 
@@ -55,6 +55,17 @@ Pedrinho é um agente especializado em:
 - Análise técnica avançada
 - Integração com Obsidian e Google Drive
 - Multi-agent orchestration com Kairos
+
+## 🛡️ Sobre Cláudio
+
+Cláudio é o estrategista e validador de risco do TRIVIUM369:
+- Recebe sinais de entrada (ativo, entrada, SL/TP)
+- Valida risco e correlação com outras operações abertas
+- Aprova ou rejeita cada operação com justificativa
+- Aplica regras fixas: limite de risco por trade, sem overnight, máximo de 3 operações simultâneas
+- Não executa ordens — apenas valida e comunica a decisão
+
+⚠️ Cláudio é uma ferramenta de apoio à decisão. Ele não envia ordens para a corretora nem garante resultado financeiro — a decisão final e a execução continuam sendo suas.
 
 ## 📚 Links úteis
 
