@@ -206,6 +206,15 @@ string g_signalsLogFile = "";
 #define GV_LOSSES_PREFIX "TRIVIUM369_LOSSES_SEGUIDAS_"
 string g_gvLosses = "";
 
+// 01/08/2026 - CORRECAO B2/B3 (achados na releitura pre-unificacao, ver
+// TRIVIUM369_UNIFICADO_EA.mq5): o magic da posicao viva agora e persistido
+// numa GlobalVariable, sobrevive a reinicio do EA e nao depende do
+// comentario da ordem (que a corretora as vezes reescreve/apaga - quando
+// isso acontecia o EA deixava de se reconhecer e podia abrir uma SEGUNDA
+// posicao no mesmo simbolo). #define precisa vir antes do uso em OnInit.
+#define GV_MAGIC_ATIVO_PREFIX "TRIVIUM369_MAGIC_ATIVO_"
+string g_gvMagicAtivo = "";
+
 bool ExecucaoAutorizada()
 {
    // No Strategy Tester (backtest/otimizacao) nao existe conta real nem risco de
@@ -222,7 +231,14 @@ int    h_adx_anti_chop = INVALID_HANDLE;
 double saldoInicioDia = 0;
 datetime diaAtual = 0;
 int    tradesHoje = 0;
+// B3 - so os caminhos de fechamento (OnTradeTransaction / ReconciliarFechamentoPerdido)
+// zeram isto. TemPosicaoAberta() NUNCA zera - fazia isso antes, e se um tick
+// chegasse entre a posicao sumir da corretora e o evento de fechamento ser
+// processado, o fechamento inteiro era descartado (guarda "magicAtual==0" em
+// OnTradeTransaction), inclusive a chamada que conta a perda pra reducao
+// dinamica de risco.
 long   magicAtual = 0;           // magic da posicao atualmente aberta por ESTA instancia (0 = nenhuma)
+bool   posicaoAbertaAgora = false;
 datetime tempoAberturaPosicaoAtual = 0;
 double precoAberturaPosicaoAtual = 0;
 ENUM_POSITION_TYPE ladoPosicaoAtual = POSITION_TYPE_BUY;
@@ -456,115 +472,207 @@ void AtualizaParecer(string texto)
 }
 
 //+------------------------------------------------------------------+
-int OnInit()
-{
-   // Aviso de escopo - validado em GER40/BTCUSD (rigoroso) + 6 pares majores
-   // (09/07 e 16/07, treino/teste). EURUSD/USDJPY testados 16/07 e REPROVADOS
-   // (ver CarregarCalibragemPorAtivo) - ficam fora mesmo com grafico aberto.
-   string sym = _Symbol; StringToUpper(sym);
-   bool escopoValido = (StringFind(sym,"GER40")>=0 || StringFind(sym,"BTC")>=0 ||
-                        StringFind(sym,"NZDJPY")>=0 || StringFind(sym,"USDCAD")>=0 ||
-                        StringFind(sym,"AUDUSD")>=0 || StringFind(sym,"NZDUSD")>=0 ||
-                        StringFind(sym,"GBPUSD")>=0 || StringFind(sym,"USDCHF")>=0);
-   if(!escopoValido)
-   {
-      Print("AVISO: NEXUS369_TREND_VALIDADO so foi validado em GER40, BTCUSD, NZDJPY, USDCAD, AUDUSD, NZDUSD, GBPUSD, USDCHF.");
-      Print("Rodando em ", sym, " - fora do escopo testado. Recomendo NAO operar aqui sem novo teste.");
-   }
-
-   CarregarCalibragemPorAtivo();
-   GarantirContadorMagicNuncaRetrocede();
-   if(!g_ParOperavel)
-      Print("AVISO: ", sym, " foi testado e REPROVADO no backtest (16/07/2026) - grafico fica so visual, EA nao abre posicao aqui.");
-
-   h_adx = iADX(_Symbol, _Period, InpADXPeriod);
-   h_atr = iATR(_Symbol, _Period, InpATRPeriod);
-   if(h_adx == INVALID_HANDLE || h_atr == INVALID_HANDLE)
-   {
-      Print("Erro ao criar handles ADX/ATR: ", GetLastError());
-      return INIT_FAILED;
-   }
-
-   if(InpFiltroAntiChopAtivo)
-   {
-      h_adx_anti_chop = iADX(_Symbol, InpAntiChopTimeframe, InpADXPeriod);
-      if(h_adx_anti_chop == INVALID_HANDLE)
-      {
-         Print("Erro ao criar handle ADX anti-chop (", EnumToString(InpAntiChopTimeframe), "): ", GetLastError());
-         return INIT_FAILED;
-      }
-   }
-
-   trade.SetDeviationInPoints(30);
-   magicAtual = 0; // nenhuma posicao aberta por esta instancia ainda
-
-   saldoInicioDia = AccountInfoDouble(ACCOUNT_BALANCE);
-   diaAtual = iTime(_Symbol, PERIOD_D1, 0);
-   tradesHoje = 0;
-
-   long contaLogin = AccountInfoInteger(ACCOUNT_LOGIN);
-   logFileName = "NEXUS369_TREND_RELATORIO_" + sym + "_" + IntegerToString(contaLogin) + ".txt";
-   g_signalsLogFile = "TRIVIUM369_SIGNALS_LOG_" + IntegerToString(contaLogin) + ".csv";
-   g_gvLosses = GV_LOSSES_PREFIX + IntegerToString(contaLogin) + "_" + sym;
-
-   LogRelatorio(StringFormat("=== INIT %s | %s %s | Magic=sequencial (ver TRIVIUM369_SIGNALS_LOG.csv) | ADX>%.1f Vol>%.1fx | SL=%.1fxATR TP=%.1fxATR | Risco=%.1f%% | Calibragem=%s | EXECUCAO=%s ===",
-      TimeToString(TimeCurrent(), TIME_DATE|TIME_MINUTES), sym, NomePeriodo(_Period),
-      g_ADXMinimo, g_VolumeMinimo, InpStopATRMult, InpAlvoATRMult, g_RiskPercent,
-      InpAutoCalibrarPorAtivo ? "AUTOMATICA" : "MANUAL",
-      ExecucaoAutorizada() ? "AUTORIZADA" : "AGUARDANDO 'pode rodar' do Ronei"));
-   return INIT_SUCCEEDED;
-}
-
-void OnDeinit(const int reason)
-{
-   if(h_adx != INVALID_HANDLE) IndicatorRelease(h_adx);
-   if(h_atr != INVALID_HANDLE) IndicatorRelease(h_atr);
-   if(h_adx_anti_chop != INVALID_HANDLE) IndicatorRelease(h_adx_anti_chop);
-   ObjectDelete(0, PAINEL_TREND_NOME);
-}
-
-//+------------------------------------------------------------------+
+// 01/08/2026 - CORRIGIDO (B1, achado na releitura pre-unificacao): sem a
+// guarda de equity<=0, uma leitura de ACCOUNT_EQUITY zerada por race
+// condition de reconexao (o mesmo bug que o Ronei achou ao vivo em 09/07,
+// e que STOP_DIARIO.mqh ja defende em dois pontos) virava
+// saldoInicioDia=0, e a proxima chamada de DrawdownDiarioEstourado()
+// dividia por zero (inf >= InpMaxDDPercent = true), bloqueando o EA o dia
+// inteiro em silencio. Agora adia a virada do dia pro proximo tick em vez
+// de commitar um saldo invalido.
 bool NovoDia()
 {
    datetime hoje = iTime(_Symbol, PERIOD_D1, 0);
-   if(hoje != diaAtual)
-   {
-      diaAtual = hoje;
-      tradesHoje = 0;
-      saldoInicioDia = AccountInfoDouble(ACCOUNT_EQUITY);
-      return true;
-   }
-   return false;
+   if(hoje == diaAtual) return false;
+
+   double equity = AccountInfoDouble(ACCOUNT_EQUITY);
+   if(equity <= 0) return false; // leitura invalida - tenta de novo no proximo tick
+
+   diaAtual = hoje;
+   tradesHoje = 0;
+   saldoInicioDia = equity;
+   return true;
 }
 
 bool DrawdownDiarioEstourado()
 {
+   // B1 - sem isso, saldoInicioDia==0 (equity invalida na virada do dia)
+   // gerava divisao por zero e bloqueio silencioso o dia inteiro.
+   if(saldoInicioDia <= 0) return false;
+
    double equity = AccountInfoDouble(ACCOUNT_EQUITY);
+   if(equity <= 0) return false; // leitura invalida - nao decide neste tick
+
    double ddPct = (saldoInicioDia - equity) / saldoInicioDia * 100.0;
    return (ddPct >= InpMaxDDPercent);
+}
+
+// 01/08/2026 - CORRIGIDO (B2, achado na releitura pre-unificacao): a
+// identidade por comentario ("TND ") quebrava quando a corretora
+// reescrevia/apagava o comentario (ex: anota "[sl]", ou limpa) - o EA
+// deixava de se reconhecer e podia abrir uma SEGUNDA posicao no mesmo
+// simbolo. Agora a identidade e o magic, persistido em GlobalVariable
+// (sobrevive a reinicio do EA); o comentario vira so plano B.
+long MagicAtivoPersistido()
+{
+   if(g_gvMagicAtivo == "") return 0;
+   if(!GlobalVariableCheck(g_gvMagicAtivo)) return 0;
+   return (long)GlobalVariableGet(g_gvMagicAtivo);
+}
+
+void GravarMagicAtivo(long magic)
+{
+   magicAtual = magic;
+   if(g_gvMagicAtivo == "") return;
+   if(magic == 0) GlobalVariableDel(g_gvMagicAtivo);
+   else           GlobalVariableSet(g_gvMagicAtivo, (double)magic);
 }
 
 // 15/07/2026 - CORRIGIDO (mesmo bug achado na conta real: entradas
 // duplicadas apos reload da matriz). magicAtual e memoria, zera ao
 // reinicializar - fechar a JANELA do grafico nao fecha a POSICAO na
-// corretora. Agora checa por REALIDADE (simbolo + comentario "TND "),
-// sobrevive a reinicializacao do EA.
+// corretora. Agora checa por REALIDADE (magic persistido, comentario
+// "TND " so como plano B - ver comentario de MagicAtivoPersistido acima).
+//
+// 01/08/2026 - CORRIGIDO (B3, o mais grave dos tres achados na releitura):
+// esta funcao zerava magicAtual assim que a posicao sumia da lista da
+// corretora. Se um tick chegasse antes do OnTradeTransaction processar o
+// fechamento, a guarda "magicAtual==0" la dentro descartava o evento
+// inteiro - perdendo a chamada de RegistrarResultadoRisco(), ou seja, o
+// contador de perdas seguidas podia nunca subir e a reducao dinamica de
+// risco (0.5x/0.25x) podia nunca ligar de verdade. Agora esta funcao SO
+// LE o estado (posicaoAbertaAgora) - quem zera magicAtual e exclusivamente
+// o fechamento (OnTradeTransaction ou ReconciliarFechamentoPerdido).
 bool TemPosicaoAberta()
 {
+   long magicEsperado = (magicAtual != 0) ? magicAtual : MagicAtivoPersistido();
+
    for(int i = 0; i < PositionsTotal(); i++)
    {
       ulong ticket = PositionGetTicket(i);
+      if(ticket == 0) continue;
       if(!PositionSelectByTicket(ticket)) continue;
       if(PositionGetString(POSITION_SYMBOL) != _Symbol) continue;
-      string comentario = PositionGetString(POSITION_COMMENT);
-      if(StringFind(comentario, "TND ") == 0)
+
+      long magic = PositionGetInteger(POSITION_MAGIC);
+
+      if(magicEsperado != 0 && magic == magicEsperado)
       {
-         magicAtual = PositionGetInteger(POSITION_MAGIC);
+         if(magicAtual != magic) GravarMagicAtivo(magic);
+         posicaoAbertaAgora = true;
          return true;
       }
+
+      // plano B: so adota pelo comentario se ainda nao sabemos nosso magic
+      // (evita sequestrar posicao de outra instancia deste EA no mesmo simbolo)
+      if(magicEsperado == 0 && magic >= MAGIC_SEQUENCIAL_INICIO)
+      {
+         string comentario = PositionGetString(POSITION_COMMENT);
+         if(StringFind(comentario, "TND ") == 0)
+         {
+            GravarMagicAtivo(magic);
+            posicaoAbertaAgora = true;
+            LogRelatorio(StringFormat("Posicao #%d readotada pelo comentario apos reinicio (magic nao estava persistido).", (int)magic));
+            return true;
+         }
+      }
    }
-   magicAtual = 0;
-   return false;
+
+   posicaoAbertaAgora = false;
+   return false; // NAO zera magicAtual aqui - ver comentario acima (B3)
+}
+
+int LossesSeguidosAtual()
+{
+   if(g_gvLosses == "") return 0;
+   return GlobalVariableCheck(g_gvLosses) ? (int)GlobalVariableGet(g_gvLosses) : 0;
+}
+
+void RegistrarResultadoRisco(bool ganhou)
+{
+   if(g_gvLosses == "") return;
+   if(ganhou) GlobalVariableSet(g_gvLosses, 0.0);
+   else GlobalVariableSet(g_gvLosses, (double)(LossesSeguidosAtual() + 1));
+}
+
+//+------------------------------------------------------------------+
+// FECHAMENTO - compartilhado entre o caminho normal (OnTradeTransaction)
+// e a rede de seguranca (ReconciliarFechamentoPerdido). Quem chama ja tem
+// que ter reivindicado o magic (GravarMagicAtivo(0)) antes de chamar, pra
+// nao processar o mesmo fechamento duas vezes.
+//+------------------------------------------------------------------+
+void ProcessarFechamento(long magic, double precoSaida, double profit, long posicaoId, string origem)
+{
+   bool ganhou = (profit >= 0);
+   string status = ganhou ? "GANHO" : "PERDA";
+   string resultado = ganhou ? "GANHO (bateu o alvo)" : "PERDA (bateu o stop)";
+
+   double point = SymbolInfoDouble(_Symbol, SYMBOL_POINT);
+   double resultadoPips = 0;
+   if(point > 0 && precoAberturaPosicaoAtual > 0)
+      resultadoPips = (ladoPosicaoAtual == POSITION_TYPE_BUY)
+         ? (precoSaida - precoAberturaPosicaoAtual) / point
+         : (precoAberturaPosicaoAtual - precoSaida) / point;
+
+   int barrasDuracao = (tempoAberturaPosicaoAtual > 0) ? (int)iBarShift(_Symbol, _Period, tempoAberturaPosicaoAtual) : -1;
+
+   RegistraSinalFechamento(magic, precoSaida, "SL_ou_TP", resultadoPips, profit, barrasDuracao, status);
+   // Coracao da reducao dinamica de risco - perder esta chamada (bug B3) e o
+   // motivo pelo qual isso precisou virar funcao separada e testavel.
+   RegistrarResultadoRisco(ganhou);
+
+   LogRelatorio(StringFormat(
+      "FECHAMENTO (%s) posicao=%d Magic=%d | %s | %s | saida=%s | resultado=%s | P&L=%.2f %s | perdas seguidas agora: %d",
+      origem, (int)posicaoId, (int)magic, _Symbol, TimeToString(TimeCurrent(), TIME_DATE|TIME_MINUTES),
+      DoubleToString(precoSaida, _Digits), resultado, profit, AccountInfoString(ACCOUNT_CURRENCY),
+      LossesSeguidosAtual()));
+
+   DesenhaSetaSaida(magic, TimeCurrent(), precoSaida, ganhou);
+   AtualizaParecer(StringFormat(
+      "TRIVIUM369 - PARECER DA ULTIMA ORDEM\n%s | FECHADA #%d\nSaida: %s | Resultado: %s\nP&L: %.2f %s | Pips: %.1f",
+      _Symbol, (int)magic, DoubleToString(precoSaida, _Digits), resultado,
+      profit, AccountInfoString(ACCOUNT_CURRENCY), resultadoPips));
+
+   posicaoAbertaAgora = false;
+   tempoAberturaPosicaoAtual = 0;
+   precoAberturaPosicaoAtual = 0;
+}
+
+//+------------------------------------------------------------------+
+// Rede de seguranca do B3: temos magic registrado mas a posicao nao existe
+// mais e o evento de fechamento nunca chegou (OnTradeTransaction perdido -
+// reinicio do terminal no meio do fechamento, etc). Busca o deal de saida
+// no historico REAL da corretora (nunca se perde) pra que a contagem de
+// perdas seguidas nao fique furada.
+//+------------------------------------------------------------------+
+void ReconciliarFechamentoPerdido()
+{
+   if(magicAtual == 0 || posicaoAbertaAgora) return;
+
+   long magic = magicAtual;
+   datetime desde = TimeCurrent() - 7 * 24 * 60 * 60; // janela curta - fechamento perdido e sempre recente
+   if(!HistorySelect(desde, TimeCurrent())) return;
+
+   int total = HistoryDealsTotal();
+   for(int i = total - 1; i >= 0; i--)
+   {
+      ulong dealTicket = HistoryDealGetTicket(i);
+      if(dealTicket == 0) continue;
+      if(HistoryDealGetInteger(dealTicket, DEAL_MAGIC) != magic) continue;
+      if(HistoryDealGetString(dealTicket, DEAL_SYMBOL) != _Symbol) continue;
+      if((ENUM_DEAL_ENTRY)HistoryDealGetInteger(dealTicket, DEAL_ENTRY) != DEAL_ENTRY_OUT) continue;
+
+      double profit = HistoryDealGetDouble(dealTicket, DEAL_PROFIT) + HistoryDealGetDouble(dealTicket, DEAL_SWAP) + HistoryDealGetDouble(dealTicket, DEAL_COMMISSION);
+      double precoSaida = HistoryDealGetDouble(dealTicket, DEAL_PRICE);
+      long posicaoId = HistoryDealGetInteger(dealTicket, DEAL_POSITION_ID);
+
+      GravarMagicAtivo(0); // reivindica ANTES de processar (evita contar 2x)
+      ProcessarFechamento(magic, precoSaida, profit, posicaoId, "reconciliado do historico");
+      return;
+   }
+
+   LogRelatorio(StringFormat("AVISO: magic #%d nao tem posicao aberta nem deal de saida no historico recente - registro limpo.", (int)magic));
+   GravarMagicAtivo(0);
 }
 
 //+------------------------------------------------------------------+
@@ -625,18 +733,6 @@ void GerenciaTrailingStop()
    }
 }
 
-int LossesSeguidosAtual()
-{
-   if(g_gvLosses == "") return 0;
-   return GlobalVariableCheck(g_gvLosses) ? (int)GlobalVariableGet(g_gvLosses) : 0;
-}
-
-void RegistrarResultadoRisco(bool ganhou)
-{
-   if(g_gvLosses == "") return;
-   if(ganhou) GlobalVariableSet(g_gvLosses, 0.0);
-   else GlobalVariableSet(g_gvLosses, (double)(LossesSeguidosAtual() + 1));
-}
 
 double MultiplicadorRiscoDinamico()
 {
@@ -687,6 +783,81 @@ double CalcularLote(double riskPct, double slDistPoints)
 }
 
 //+------------------------------------------------------------------+
+int OnInit()
+{
+   // Aviso de escopo - validado em GER40/BTCUSD (rigoroso) + 6 pares majores
+   // (09/07 e 16/07, treino/teste). EURUSD/USDJPY testados 16/07 e REPROVADOS
+   // (ver CarregarCalibragemPorAtivo) - ficam fora mesmo com grafico aberto.
+   string sym = _Symbol; StringToUpper(sym);
+   bool escopoValido = (StringFind(sym,"GER40")>=0 || StringFind(sym,"BTC")>=0 ||
+                        StringFind(sym,"NZDJPY")>=0 || StringFind(sym,"USDCAD")>=0 ||
+                        StringFind(sym,"AUDUSD")>=0 || StringFind(sym,"NZDUSD")>=0 ||
+                        StringFind(sym,"GBPUSD")>=0 || StringFind(sym,"USDCHF")>=0);
+   if(!escopoValido)
+   {
+      Print("AVISO: NEXUS369_TREND_VALIDADO so foi validado em GER40, BTCUSD, NZDJPY, USDCAD, AUDUSD, NZDUSD, GBPUSD, USDCHF.");
+      Print("Rodando em ", sym, " - fora do escopo testado. Recomendo NAO operar aqui sem novo teste.");
+   }
+
+   CarregarCalibragemPorAtivo();
+   GarantirContadorMagicNuncaRetrocede();
+   if(!g_ParOperavel)
+      Print("AVISO: ", sym, " foi testado e REPROVADO no backtest (16/07/2026) - grafico fica so visual, EA nao abre posicao aqui.");
+
+   h_adx = iADX(_Symbol, _Period, InpADXPeriod);
+   h_atr = iATR(_Symbol, _Period, InpATRPeriod);
+   if(h_adx == INVALID_HANDLE || h_atr == INVALID_HANDLE)
+   {
+      Print("Erro ao criar handles ADX/ATR: ", GetLastError());
+      return INIT_FAILED;
+   }
+
+   if(InpFiltroAntiChopAtivo)
+   {
+      h_adx_anti_chop = iADX(_Symbol, InpAntiChopTimeframe, InpADXPeriod);
+      if(h_adx_anti_chop == INVALID_HANDLE)
+      {
+         Print("Erro ao criar handle ADX anti-chop (", EnumToString(InpAntiChopTimeframe), "): ", GetLastError());
+         return INIT_FAILED;
+      }
+   }
+
+   trade.SetDeviationInPoints(30);
+
+   saldoInicioDia = AccountInfoDouble(ACCOUNT_BALANCE); // 0 = invalido, DrawdownDiarioEstourado() ja trata
+   diaAtual = iTime(_Symbol, PERIOD_D1, 0);
+   tradesHoje = 0;
+
+   long contaLogin = AccountInfoInteger(ACCOUNT_LOGIN);
+   logFileName = "NEXUS369_TREND_RELATORIO_" + sym + "_" + IntegerToString(contaLogin) + ".txt";
+   g_signalsLogFile = "TRIVIUM369_SIGNALS_LOG_" + IntegerToString(contaLogin) + ".csv";
+   g_gvLosses = GV_LOSSES_PREFIX + IntegerToString(contaLogin) + "_" + sym;
+   g_gvMagicAtivo = GV_MAGIC_ATIVO_PREFIX + IntegerToString(contaLogin) + "_" + sym;
+
+   // B2/B3 - recupera a posicao viva (se o EA foi reiniciado com posicao
+   // aberta) e reconcilia qualquer fechamento que tenha acontecido enquanto
+   // o EA estava desligado, pra nao perder a contagem de perdas seguidas.
+   magicAtual = MagicAtivoPersistido();
+   TemPosicaoAberta();
+   ReconciliarFechamentoPerdido();
+
+   LogRelatorio(StringFormat("=== INIT %s | %s %s | Magic=sequencial (ver TRIVIUM369_SIGNALS_LOG.csv) | ADX>%.1f Vol>%.1fx | SL=%.1fxATR TP=%.1fxATR | Risco=%.1f%% | Calibragem=%s | EXECUCAO=%s ===",
+      TimeToString(TimeCurrent(), TIME_DATE|TIME_MINUTES), sym, NomePeriodo(_Period),
+      g_ADXMinimo, g_VolumeMinimo, InpStopATRMult, InpAlvoATRMult, g_RiskPercent,
+      InpAutoCalibrarPorAtivo ? "AUTOMATICA" : "MANUAL",
+      ExecucaoAutorizada() ? "AUTORIZADA" : "AGUARDANDO 'pode rodar' do Ronei"));
+   return INIT_SUCCEEDED;
+}
+
+void OnDeinit(const int reason)
+{
+   if(h_adx != INVALID_HANDLE) IndicatorRelease(h_adx);
+   if(h_atr != INVALID_HANDLE) IndicatorRelease(h_atr);
+   if(h_adx_anti_chop != INVALID_HANDLE) IndicatorRelease(h_adx_anti_chop);
+   ObjectDelete(0, PAINEL_TREND_NOME);
+}
+
+//+------------------------------------------------------------------+
 void OnTick()
 {
    NovoDia();
@@ -697,6 +868,10 @@ void OnTick()
    // apos qualquer reinicializacao do EA (magicAtual ainda em 0). Chamando
    // TemPosicaoAberta() ANTES elimina esse blind-spot.
    TemPosicaoAberta();
+   // B3 - se a posicao sumiu e o evento de fechamento nao chegou (OnTradeTransaction
+   // perdido), busca o resultado no historico antes de decidir qualquer coisa -
+   // senao a contagem de perdas seguidas fica furada (ver comentario da funcao).
+   ReconciliarFechamentoPerdido();
    GerenciaTrailingStop(); // roda sempre - protege posicao aberta mesmo com stop diario acionado ou execucao nao autorizada
    if(!ExecucaoAutorizada()) return; // KILL SWITCH - EA anexado e pronto, mas so abre posicao com "pode rodar" do Ronei
    if(!g_ParOperavel) return; // 16/07/2026 - par testado e reprovado no backtest (ver CarregarCalibragemPorAtivo), grafico fica so visual
@@ -824,7 +999,8 @@ void OnTick()
          trade.SetExpertMagicNumber(novoMagic);
          if(trade.Buy(lots, _Symbol, entry, sl, tp, comentario))
          {
-            magicAtual = novoMagic;
+            GravarMagicAtivo(novoMagic); // B2/B3 - persiste desde a abertura
+            posicaoAbertaAgora = true;
             tempoAberturaPosicaoAtual = curBar;
             precoAberturaPosicaoAtual = entry;
             ladoPosicaoAtual = POSITION_TYPE_BUY;
@@ -857,7 +1033,8 @@ void OnTick()
          trade.SetExpertMagicNumber(novoMagic);
          if(trade.Sell(lots, _Symbol, entry, sl, tp, comentario))
          {
-            magicAtual = novoMagic;
+            GravarMagicAtivo(novoMagic); // B2/B3 - persiste desde a abertura
+            posicaoAbertaAgora = true;
             tempoAberturaPosicaoAtual = curBar;
             precoAberturaPosicaoAtual = entry;
             ladoPosicaoAtual = POSITION_TYPE_SELL;
@@ -894,48 +1071,31 @@ ulong ticket_after()
 //+------------------------------------------------------------------+
 // Relatorio de fechamento - registra resultado real de cada trade
 //+------------------------------------------------------------------+
+// 01/08/2026 - CORRIGIDO (B3): a guarda antiga "magicAtual == 0" descartava
+// o evento inteiro sempre que TemPosicaoAberta() ja tinha zerado magicAtual
+// no tick anterior (o que agora nao acontece mais - ver comentario de
+// TemPosicaoAberta). Aqui so falta o padrao "reivindicar antes de
+// processar": tira uma foto do magic, chama GravarMagicAtivo(0) ANTES de
+// processar, pra ReconciliarFechamentoPerdido() nunca competir pelo mesmo
+// fechamento (e contar a mesma perda duas vezes, o que tambem seria errado).
 void OnTradeTransaction(const MqlTradeTransaction &trans, const MqlTradeRequest &request, const MqlTradeResult &result)
 {
    if(trans.type != TRADE_TRANSACTION_DEAL_ADD) return;
+
+   long magic = magicAtual;
+   if(magic == 0) return; // ja processado (ou nada nosso aberto)
+
    if(!HistoryDealSelect(trans.deal)) return;
-   if(magicAtual == 0 || HistoryDealGetInteger(trans.deal, DEAL_MAGIC) != magicAtual) return;
+   if(HistoryDealGetInteger(trans.deal, DEAL_MAGIC) != magic) return;
    if(HistoryDealGetString(trans.deal, DEAL_SYMBOL) != _Symbol) return;
-   ENUM_DEAL_ENTRY entryType = (ENUM_DEAL_ENTRY)HistoryDealGetInteger(trans.deal, DEAL_ENTRY);
-   if(entryType != DEAL_ENTRY_OUT) return; // so registra ao FECHAR a posicao
+   if((ENUM_DEAL_ENTRY)HistoryDealGetInteger(trans.deal, DEAL_ENTRY) != DEAL_ENTRY_OUT) return; // so no fechamento
 
    double profit = HistoryDealGetDouble(trans.deal, DEAL_PROFIT) + HistoryDealGetDouble(trans.deal, DEAL_SWAP) + HistoryDealGetDouble(trans.deal, DEAL_COMMISSION);
    double precoSaida = HistoryDealGetDouble(trans.deal, DEAL_PRICE);
-   long ticket = HistoryDealGetInteger(trans.deal, DEAL_POSITION_ID);
-   string resultado = profit >= 0 ? "GANHO (bateu o alvo)" : "PERDA (bateu o stop)";
-   string status = profit >= 0 ? "GANHO" : "PERDA";
+   long posicaoId = HistoryDealGetInteger(trans.deal, DEAL_POSITION_ID);
 
-   double point = SymbolInfoDouble(_Symbol, SYMBOL_POINT);
-   // motivo da saida: aproxima por SL/TP mais proximo do preco de saida (nao ha campo direto no deal)
-   string motivoSaida = "SL_ou_TP";
-   int barrasDuracao = (tempoAberturaPosicaoAtual > 0) ? (int)iBarShift(_Symbol, _Period, tempoAberturaPosicaoAtual) : -1;
-   double resultadoPips = 0;
-   if(point > 0 && precoAberturaPosicaoAtual > 0)
-      resultadoPips = (ladoPosicaoAtual == POSITION_TYPE_BUY)
-         ? (precoSaida - precoAberturaPosicaoAtual) / point
-         : (precoAberturaPosicaoAtual - precoSaida) / point;
-
-   RegistraSinalFechamento(magicAtual, precoSaida, motivoSaida, resultadoPips, profit, barrasDuracao, status);
-   RegistrarResultadoRisco(profit >= 0);
-
-   LogRelatorio(StringFormat(
-      "FECHAMENTO #%d Magic=%d | %s | %s | saida=%s | resultado=%s | P&L=%.2f %s",
-      (int)ticket, (int)magicAtual, _Symbol, TimeToString(TimeCurrent(), TIME_DATE|TIME_MINUTES),
-      DoubleToString(precoSaida, _Digits), resultado, profit, AccountInfoString(ACCOUNT_CURRENCY)));
-
-   DesenhaSetaSaida(magicAtual, TimeCurrent(), precoSaida, profit >= 0);
-   AtualizaParecer(StringFormat(
-      "TRIVIUM369 - PARECER DA ULTIMA ORDEM\n%s | FECHADA #%d\nSaida: %s | Resultado: %s\nP&L: %.2f %s | Pips: %.1f",
-      _Symbol, (int)magicAtual, DoubleToString(precoSaida, _Digits), resultado,
-      profit, AccountInfoString(ACCOUNT_CURRENCY), resultadoPips));
-
-   magicAtual = 0; // libera esta instancia pra gerar um Magic novo no proximo sinal
-   tempoAberturaPosicaoAtual = 0;
-   precoAberturaPosicaoAtual = 0;
+   GravarMagicAtivo(0); // reivindica ANTES de processar (evita contar 2x)
+   ProcessarFechamento(magic, precoSaida, profit, posicaoId, "evento");
 }
 
 //+------------------------------------------------------------------+
